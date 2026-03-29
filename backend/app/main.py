@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
+from app.api.evaluate import router as evaluate_router
 from app.api.merge import router as merge_router
+from app.api.packs import router as packs_router
 
 app = FastAPI(
     title="Border Checker API",
@@ -9,6 +11,8 @@ app = FastAPI(
 )
 
 app.include_router(merge_router)
+app.include_router(packs_router)
+app.include_router(evaluate_router)
 
 
 @app.get("/")

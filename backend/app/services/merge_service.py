@@ -22,6 +22,18 @@ def flatten_schema_fields(schema: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     return field_map
 
 
+def is_nullable_field(meta: Dict[str, Any]) -> bool:
+    field_type = meta.get("type")
+
+    if isinstance(field_type, list) and "null" in field_type:
+        return True
+
+    if isinstance(field_type, str) and "null" in field_type:
+        return True
+
+    return False
+
+
 def validate_required_fields(
     schema: Dict[str, Any],
     merged_data: Dict[str, Any],
@@ -30,7 +42,18 @@ def validate_required_fields(
     missing_fields: List[str] = []
 
     for field_name, meta in field_map.items():
-        if meta.get("required") is True and merged_data.get(field_name) is None:
+        if meta.get("required") is not True:
+            continue
+
+        # 아예 키가 없으면 missing
+        if field_name not in merged_data:
+            missing_fields.append(field_name)
+            continue
+
+        value = merged_data.get(field_name)
+
+        # nullable 필드는 None 허용
+        if value is None and not is_nullable_field(meta):
             missing_fields.append(field_name)
 
     return missing_fields
