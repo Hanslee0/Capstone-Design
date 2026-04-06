@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException
 
+from app.schemas.evaluate_request import EvaluateRequest
 from app.schemas.evaluation import FinalEvaluationResponse
 from app.schemas.merge import MergeSampleRequest
 from app.services.evaluation_service import evaluate_rules
 from app.services.file_loader import load_json_file, load_yaml_file
 from app.services.merge_service import merge_inputs
 from app.services.pack_loader import load_gdpr_pack
+from app.services.request_merge_service import build_merged_input_from_request
 from app.utils.path_helper import get_policy_pack_path, get_sample_input_path
 
 router = APIRouter(prefix="/api/v1", tags=["evaluate"])
@@ -25,6 +27,30 @@ def evaluate_sample(payload: MergeSampleRequest):
         pack_data = load_gdpr_pack()
 
         return evaluate_rules(merged_input=merged_input, pack_data=pack_data)
+
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.post("/evaluate", response_model=FinalEvaluationResponse)
+def evaluate(payload: EvaluateRequest):
+    try:
+        merged_input = build_merged_input_from_request(
+            aws_data=payload.aws_data,
+            policy_data=payload.policy_data,
+            schema_file_name=payload.schema_file_name,
+        )
+
+        pack_data = load_gdpr_pack(payload.pack_file_name)
+
+        return evaluate_rules(
+            merged_input=merged_input,
+            pack_data=pack_data,
+        )
 
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

@@ -17,6 +17,13 @@ class TriggeredRuleResponse(BaseModel):
     references: List[str]
 
 
+class QualitativeReviewHintsResponse(BaseModel):
+    manual_review_required: bool
+    review_boundary_summary: str
+    checklist: List[str]
+    uncertainty_flags: List[str]
+
+
 class FinalEvaluationResponse(BaseModel):
     message: str
     final_decision: str
@@ -28,5 +35,9 @@ class FinalEvaluationResponse(BaseModel):
     total_compliance_score: int
     legal_basis_articles: List[int]
     required_actions: List[str]
+    summary: str
+    explanation: str
+    next_steps: List[str]
+    qualitative_review_hints: QualitativeReviewHintsResponse
     triggered_rules: List[TriggeredRuleResponse]
     merged_input: Dict[str, Any]

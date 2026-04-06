@@ -4,7 +4,7 @@ processing_purpose_defined: true
 data_minimized: true
 retention_period_defined: true
 lawful_basis: contract
-special_category_condition_met: false
+special_category_condition_met: true
 target_region: us-east-1
 dpa_in_place: true
 processor_sufficient_guarantees: true

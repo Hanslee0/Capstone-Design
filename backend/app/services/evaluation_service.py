@@ -1,6 +1,12 @@
 from typing import Any, Dict, List
 
 from app.services.condition_evaluator import evaluate_condition
+from app.services.explanation_service import (
+    build_explanation,
+    build_next_steps,
+    build_summary,
+)
+from app.services.qualitative_service import build_qualitative_review_hints
 from app.services.resolution_service import (
     collect_legal_basis_articles,
     collect_required_actions,
@@ -72,8 +78,23 @@ def evaluate_rules(
     legal_basis_articles = collect_legal_basis_articles(triggered_rules)
     required_actions = collect_required_actions(triggered_rules)
 
+    summary = build_summary(final_decision, triggered_rules)
+    explanation = build_explanation(
+        final_decision=final_decision,
+        merged_input=merged_input,
+        triggered_rules=triggered_rules,
+        legal_basis_articles=legal_basis_articles,
+    )
+    next_steps = build_next_steps(required_actions)
+
+    qualitative_review_hints = build_qualitative_review_hints(
+        pack_data=pack_data,
+        triggered_rules=triggered_rules,
+        final_decision=final_decision,
+    )
+
     return {
-        "message": "Rules evaluated and final decision resolved successfully.",
+        "message": "Rules evaluated, final decision resolved, explanation generated, and qualitative review hints added successfully.",
         "final_decision": final_decision,
         "risk_level": risk_level,
         "matched_rule_count": len(triggered_rules),
@@ -83,6 +104,10 @@ def evaluate_rules(
         "total_compliance_score": total_compliance_score,
         "legal_basis_articles": legal_basis_articles,
         "required_actions": required_actions,
+        "summary": summary,
+        "explanation": explanation,
+        "next_steps": next_steps,
+        "qualitative_review_hints": qualitative_review_hints,
         "triggered_rules": triggered_rules,
         "merged_input": merged_input,
     }
