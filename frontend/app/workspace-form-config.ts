@@ -5,68 +5,229 @@ export const STORAGE_KEY = "border-checker-form-v2";
 export const emptyOption: FieldOption = {
   value: "",
   label: "선택",
+  description: "아직 항목을 고르지 않은 상태입니다.",
 };
 
 export const datasetOptions: FieldOption[] = [
-  { value: "eu_customer_profiles", label: "EU 고객 프로필 데이터" },
-  { value: "eu_marketing_events", label: "EU 마케팅 이벤트 데이터" },
-  { value: "eu_support_tickets", label: "EU 고객지원 티켓 데이터" },
-  { value: "eu_hr_records", label: "EU 인사 기록 데이터" },
-  { value: "eu_health_support_cases", label: "EU 건강·민감 케이스 데이터" },
+  {
+    value: "eu_customer_profiles",
+    label: "EU 고객 프로필 데이터",
+    description: "이름, 이메일, 국가, 멤버십 등 계정 운영에 쓰는 고객 기본정보입니다.",
+  },
+  {
+    value: "eu_marketing_events",
+    label: "EU 마케팅 이벤트 데이터",
+    description: "캠페인 클릭, 수신 동의, 쿠폰 반응처럼 마케팅 성과 분석에 쓰는 로그입니다.",
+  },
+  {
+    value: "eu_support_tickets",
+    label: "EU 고객지원 티켓 데이터",
+    description: "문의 내용, 상담 이력, 처리 상태처럼 고객지원 업무에 필요한 기록입니다.",
+  },
+  {
+    value: "eu_hr_records",
+    label: "EU 인사 기록 데이터",
+    description: "임직원 계약, 근무, 급여 관련 정보처럼 접근 권한을 좁혀야 하는 내부 데이터입니다.",
+  },
+  {
+    value: "eu_health_support_cases",
+    label: "EU 건강·민감 케이스 데이터",
+    description: "건강 상태, 진료 문의, 민감 상담 내용처럼 추가 근거와 보호조치가 필요한 데이터입니다.",
+  },
 ];
 
 export const dataTypeOptions: FieldOption[] = [
-  { value: "customer_profiles", label: "고객 프로필" },
-  { value: "analytics_events", label: "분석 이벤트" },
-  { value: "support_tickets", label: "지원 티켓" },
-  { value: "hr_records", label: "인사 기록" },
-  { value: "health_support_cases", label: "건강·민감 케이스" },
-  { value: "payment_operations", label: "결제 운영 데이터" },
+  {
+    value: "customer_profiles",
+    label: "고객 프로필",
+    description: "회원 식별자, 연락처, 배송지처럼 서비스 제공에 필요한 기본 고객 정보입니다.",
+  },
+  {
+    value: "analytics_events",
+    label: "분석 이벤트",
+    description: "페이지 조회, 버튼 클릭, 세션 정보처럼 제품 개선이나 통계 분석에 쓰는 행동 로그입니다.",
+  },
+  {
+    value: "support_tickets",
+    label: "지원 티켓",
+    description: "문의 본문, 첨부파일, 상담 메모처럼 고객지원 담당자가 처리하는 케이스 정보입니다.",
+  },
+  {
+    value: "hr_records",
+    label: "인사 기록",
+    description: "직원 식별정보, 근무 이력, 평가, 급여처럼 고용관계 관리를 위한 정보입니다.",
+  },
+  {
+    value: "health_support_cases",
+    label: "건강·민감 케이스",
+    description: "건강, 생체, 민감 상담 등 일반 개인정보보다 강한 법적 근거가 필요한 정보입니다.",
+  },
+  {
+    value: "payment_operations",
+    label: "결제 운영 데이터",
+    description: "결제 상태, 환불, 청구 주소, 거래 식별자처럼 정산과 분쟁 대응에 쓰는 정보입니다.",
+  },
 ];
 
 export const subjectRegionOptions: FieldOption[] = [
-  { value: "EU", label: "EU" },
-  { value: "EEA", label: "EEA" },
-  { value: "UK", label: "UK" },
-  { value: "OTHER", label: "기타" },
+  {
+    value: "EU",
+    label: "EU",
+    description: "프랑스, 독일, 스페인 등 EU 회원국 이용자 또는 임직원 데이터입니다.",
+  },
+  {
+    value: "EEA",
+    label: "EEA",
+    description: "EU와 노르웨이, 아이슬란드, 리히텐슈타인을 포함하는 정보주체 범위입니다.",
+  },
+  {
+    value: "UK",
+    label: "UK",
+    description: "영국 거주자 데이터로, UK GDPR 검토가 별도로 필요할 수 있습니다.",
+  },
+  {
+    value: "OTHER",
+    label: "기타",
+    description: "EU/EEA/UK 외 지역 정보주체이거나 지역을 아직 확정하지 못한 경우입니다.",
+  },
 ];
 
 export const euRegionOptions: FieldOption[] = [
-  { value: "eu-central-1", label: "Frankfurt · eu-central-1" },
-  { value: "eu-west-1", label: "Ireland · eu-west-1" },
-  { value: "eu-west-3", label: "Paris · eu-west-3" },
-  { value: "eu-north-1", label: "Stockholm · eu-north-1" },
+  {
+    value: "eu-central-1",
+    label: "Frankfurt · eu-central-1",
+    description: "독일 프랑크푸르트 리전으로 EU 역내 저장 또는 처리 예시입니다.",
+  },
+  {
+    value: "eu-west-1",
+    label: "Ireland · eu-west-1",
+    description: "아일랜드 리전으로 EU 역내 SaaS 또는 백업 처리 예시입니다.",
+  },
+  {
+    value: "eu-west-3",
+    label: "Paris · eu-west-3",
+    description: "프랑스 파리 리전으로 EU 고객 서비스 운영에 자주 쓰는 위치입니다.",
+  },
+  {
+    value: "eu-north-1",
+    label: "Stockholm · eu-north-1",
+    description: "스웨덴 스톡홀름 리전으로 EU 역내 분석 또는 복제 위치 예시입니다.",
+  },
 ];
 
 export const targetRegionOptions: FieldOption[] = [
-  { value: "sa-riyadh-dc", label: "Riyadh DC · sa-riyadh-dc" },
-  { value: "sa-jeddah-dc", label: "Jeddah DC · sa-jeddah-dc" },
-  { value: "sa-dammam-dc", label: "Dammam DC · sa-dammam-dc" },
+  {
+    value: "sa-riyadh-dc",
+    label: "Riyadh DC · sa-riyadh-dc",
+    description: "사우디 리야드 내 데이터센터로, 사우디 역내 보관 경로 예시입니다.",
+  },
+  {
+    value: "sa-jeddah-dc",
+    label: "Jeddah DC · sa-jeddah-dc",
+    description: "사우디 제다 데이터센터로, 사우디 안에서 이중화하는 경우에 가깝습니다.",
+  },
+  {
+    value: "sa-dammam-dc",
+    label: "Dammam DC · sa-dammam-dc",
+    description: "사우디 담맘 데이터센터로, 사우디 역내 재해복구 위치 예시입니다.",
+  },
   ...euRegionOptions,
-  { value: "eu-west-2", label: "London · eu-west-2" },
-  { value: "ap-northeast-2", label: "Seoul · ap-northeast-2" },
-  { value: "ap-northeast-1", label: "Tokyo · ap-northeast-1" },
-  { value: "us-east-1", label: "N. Virginia · us-east-1" },
-  { value: "us-west-2", label: "Oregon · us-west-2" },
-  { value: "ap-southeast-1", label: "Singapore · ap-southeast-1" },
-  { value: "ca-central-1", label: "Canada · ca-central-1" },
+  {
+    value: "eu-west-2",
+    label: "London · eu-west-2",
+    description: "영국 런던 리전으로, EU 데이터에는 제3국 이전 검토가 필요할 수 있습니다.",
+  },
+  {
+    value: "ap-northeast-2",
+    label: "Seoul · ap-northeast-2",
+    description: "한국 서울 리전으로, EU 또는 사우디 데이터 기준 국외이전 경로가 됩니다.",
+  },
+  {
+    value: "ap-northeast-1",
+    label: "Tokyo · ap-northeast-1",
+    description: "일본 도쿄 리전으로, 해외 백업이나 분석 처리 위치 예시입니다.",
+  },
+  {
+    value: "us-east-1",
+    label: "N. Virginia · us-east-1",
+    description: "미국 버지니아 리전으로, 제3국 또는 사우디 밖 이전 검토가 필요합니다.",
+  },
+  {
+    value: "us-west-2",
+    label: "Oregon · us-west-2",
+    description: "미국 오리건 리전으로, 글로벌 SaaS나 로그 분석 위치 예시입니다.",
+  },
+  {
+    value: "ap-southeast-1",
+    label: "Singapore · ap-southeast-1",
+    description: "싱가포르 리전으로, 아시아 허브 처리나 재해복구 위치 예시입니다.",
+  },
+  {
+    value: "ca-central-1",
+    label: "Canada · ca-central-1",
+    description: "캐나다 리전으로, 적정성 또는 보호조치 여부를 함께 확인하는 위치입니다.",
+  },
 ];
 
 export const lawfulBasisOptions: FieldOption[] = [
-  { value: "consent", label: "동의" },
-  { value: "contract", label: "계약 이행" },
-  { value: "legal_obligation", label: "법적 의무" },
-  { value: "vital_interest", label: "중대한 이익" },
-  { value: "public_task", label: "공적 업무" },
-  { value: "legitimate_interest", label: "정당한 이익" },
+  {
+    value: "consent",
+    label: "동의",
+    description: "마케팅 수신, 선택 기능처럼 이용자가 자유롭게 동의하고 철회할 수 있는 처리입니다.",
+  },
+  {
+    value: "contract",
+    label: "계약 이행",
+    description: "주문 배송, 계정 제공, 고객지원처럼 계약을 수행하려면 필요한 처리입니다.",
+  },
+  {
+    value: "legal_obligation",
+    label: "법적 의무",
+    description: "세금, 회계, 소비자 보호 기록처럼 법령상 보관 또는 제출 의무가 있는 처리입니다.",
+  },
+  {
+    value: "vital_interest",
+    label: "중대한 이익",
+    description: "생명이나 안전을 보호하기 위해 긴급하게 필요한 예외적 처리입니다.",
+  },
+  {
+    value: "public_task",
+    label: "공적 업무",
+    description: "공공기관 또는 법으로 부여된 공적 권한 수행과 연결된 처리입니다.",
+  },
+  {
+    value: "legitimate_interest",
+    label: "정당한 이익",
+    description: "부정사용 방지, 네트워크 보안처럼 이익형량과 정보주체 권리 검토가 필요한 처리입니다.",
+  },
 ];
 
 export const derogationTypeOptions: FieldOption[] = [
-  { value: "explicit_consent", label: "명시적 동의" },
-  { value: "contract_necessity", label: "계약상 필요" },
-  { value: "public_interest", label: "중대한 공익" },
-  { value: "legal_claims", label: "법적 청구 대응" },
-  { value: "vital_interests", label: "중대한 이익 보호" },
+  {
+    value: "explicit_consent",
+    label: "명시적 동의",
+    description: "제3국 이전 위험을 알린 뒤 이용자가 명확히 동의한 일회성 이전입니다.",
+  },
+  {
+    value: "contract_necessity",
+    label: "계약상 필요",
+    description: "해외 호텔 예약처럼 정보주체와의 계약 이행에 꼭 필요한 제한적 이전입니다.",
+  },
+  {
+    value: "public_interest",
+    label: "중대한 공익",
+    description: "법으로 인정되는 중요한 공익 목적의 제한적 이전입니다.",
+  },
+  {
+    value: "legal_claims",
+    label: "법적 청구 대응",
+    description: "분쟁, 소송, 법적 청구 제기나 방어에 필요한 자료 이전입니다.",
+  },
+  {
+    value: "vital_interests",
+    label: "중대한 이익 보호",
+    description: "정보주체가 동의할 수 없고 생명·안전 보호가 필요한 긴급 이전입니다.",
+  },
 ];
 
 export const binaryOptions: FieldOption[] = [

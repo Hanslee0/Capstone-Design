@@ -145,11 +145,16 @@ type BeginnerGuidance = {
   businessMeaning: string;
   canProceedNow: string;
   primaryReason: string;
+  legalExplanation: string;
+  decisionImpact: string;
+  supportingDetails: string[];
   firstAction: string;
   whoShouldBeInvolved: string;
   quickChecklist: string[];
   glossary: string[];
 };
+
+type TriggeredRule = EvaluationResult["triggered_rules"][number];
 
 function dedupe(values: string[]) {
   return values.filter((value, index) => value && values.indexOf(value) === index);
@@ -163,6 +168,74 @@ function explainArticles(articles: string[]) {
   );
 
   return dedupe(notes).slice(0, 5);
+}
+
+function buildRestrictionSentence(
+  rule: TriggeredRule | undefined,
+  finalDecision: EvaluationResult["final_decision"],
+  categoryHint: string,
+) {
+  if (!rule) {
+    return "현재 입력 기준에서는 결론을 뒤집을 만한 차단 조항이 뚜렷하게 발동하지 않았습니다.";
+  }
+
+  if (rule.rule_id.includes("sensitive-legitimate-interest")) {
+    return `${rule.article}에 의해 민감정보 처리에는 정당한 이익 경로를 사용할 수 없습니다. 민감정보를 계속 처리하려면 동의, 법적 의무 등 허용 가능한 근거를 다시 잡아야 합니다.`;
+  }
+
+  if (rule.category === "lawfulness") {
+    return `${rule.article} 기준으로 개인정보 처리는 목적과 연결된 적법 근거가 먼저 확인되어야 합니다. 현재는 그 근거가 비어 있어 이 데이터 처리 또는 이전을 승인 근거로 사용할 수 없습니다.`;
+  }
+
+  if (
+    rule.category === "sensitive_data"
+    || rule.category === "special_category_data"
+  ) {
+    return `${rule.article} 기준으로 민감정보는 일반 개인정보보다 강한 처리 근거와 증빙이 필요합니다. 현재 입력으로는 추가 요건이 확인되지 않아 해당 민감정보 처리를 그대로 진행하기 어렵습니다.`;
+  }
+
+  if (
+    rule.category === "cross_border_transfer"
+    || rule.category === "transfer_mechanism"
+  ) {
+    return `${rule.article} 기준으로 국외이전은 적정성 결정, 승인된 보호조치, 또는 제한적으로 허용되는 예외 경로 중 하나가 확인되어야 합니다. 현재는 유효한 이전 경로가 부족해 해당 리전으로 보내는 경로를 사용할 수 없습니다.`;
+  }
+
+  if (rule.category === "processor_management") {
+    return `${rule.article} 기준으로 외부 처리자를 쓰려면 계약 조건, 감독 책임, 재위탁 통제가 확인되어야 합니다. 이 증빙이 부족하면 벤더 경로를 운영 승인 근거로 삼기 어렵습니다.`;
+  }
+
+  if (rule.category === "security_controls") {
+    return `${rule.article} 기준으로 보안 통제와 사고 대응 준비가 실제 운영 수준으로 확인되어야 합니다. 현재는 보호조치 증빙이 부족해 보완 전 진행 위험이 큽니다.`;
+  }
+
+  if (finalDecision === "manual_review") {
+    return `${rule.article} 기준으로 ${categoryHint}을 사람이 확인해야 합니다. 지금 입력만으로는 자동 승인 근거로 쓰기 어렵습니다.`;
+  }
+
+  if (finalDecision === "condition_allow") {
+    return `${rule.article} 기준으로 ${categoryHint}에 대한 보완이 필요합니다. 조치를 끝내고 증빙을 남긴 뒤에야 운영 반영 근거가 충분해집니다.`;
+  }
+
+  return `${rule.article} 기준으로 ${categoryHint}이 확인되어 현재 입력 범위에서는 진행 가능한 경로로 볼 수 있습니다.`;
+}
+
+function buildDecisionImpact(
+  finalDecision: EvaluationResult["final_decision"],
+) {
+  if (finalDecision === "deny") {
+    return "운영 관점에서는 배포, 데이터 복제, 벤더 전달을 잠시 멈추고 법적 근거 또는 이전 경로를 재설계해야 합니다.";
+  }
+
+  if (finalDecision === "manual_review") {
+    return "운영 관점에서는 자동 승인으로 넘기지 말고, 담당자가 계약서·고지·증빙 문서를 대조한 뒤 승인 여부를 정해야 합니다.";
+  }
+
+  if (finalDecision === "condition_allow") {
+    return "운영 관점에서는 진행 방향은 열려 있지만, 결과에 나온 보완 조치가 완료되어야 실제 반영할 수 있습니다.";
+  }
+
+  return "운영 관점에서는 현재 입력된 사실관계가 유지되는 한 진행 가능하지만, 범위나 대상 리전이 바뀌면 다시 검토해야 합니다.";
 }
 
 export function buildBeginnerGuidance(
@@ -209,13 +282,32 @@ export function buildBeginnerGuidance(
     ? CATEGORY_EXPLAINERS[primaryRule.category] ?? "핵심 규정 요건"
     : "기본 검토 요건";
   const primaryReason = primaryRule
-    ? `가장 큰 이유는 "${primaryRule.title}" 항목 때문입니다. 쉽게 말하면 ${categoryHint}에 관한 문제가 결과를 좌우했습니다.`
+    ? `가장 큰 이유는 ${categoryHint}입니다. ${primaryRule.message}`
     : "현재 입력 기준으로 최종 결정을 바꿀 만큼 강하게 발동한 핵심 규칙은 많지 않습니다.";
+  const legalExplanation = buildRestrictionSentence(
+    primaryRule,
+    finalDecision,
+    categoryHint,
+  );
+  const supportingDetails = dedupe([
+    primaryRule?.rationale && primaryRule.rationale !== primaryRule.message
+      ? primaryRule.rationale
+      : "",
+    primaryRule?.required_evidence?.[0]
+      ? `확인할 증빙: ${primaryRule.required_evidence[0]}`
+      : "",
+    primaryRule?.required_actions?.[0]
+      ? `필요 조치: ${primaryRule.required_actions[0]}`
+      : "",
+  ]).slice(0, 3);
 
   return {
     businessMeaning,
     canProceedNow,
     primaryReason,
+    legalExplanation,
+    decisionImpact: buildDecisionImpact(finalDecision),
+    supportingDetails,
     firstAction:
       requiredActions[0] ??
       "현재 구조와 문서 상태가 바뀌면 다시 검토를 돌려보는 것이 좋습니다.",

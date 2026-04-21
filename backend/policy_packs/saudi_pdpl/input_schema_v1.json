@@ -14,7 +14,10 @@
           "source": "cloud_config_or_architecture_inventory"
         },
         "encryption_at_rest": {
-          "type": "boolean",
+          "type": [
+            "boolean",
+            "null"
+          ],
           "required": true,
           "description": "Whether encryption at rest is enabled for the target dataset or resource.",
           "example": true,
@@ -90,19 +93,28 @@
         "example": "KSA_RESIDENT"
       },
       "processing_purpose_defined": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether the processing purpose is clearly defined and documented.",
         "example": true
       },
       "data_minimized": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether only the minimum personal data necessary for the transfer is used.",
         "example": true
       },
       "retention_period_defined": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether retention or deletion period is documented.",
         "example": true
@@ -231,7 +243,10 @@
         "example": false
       },
       "transfer_exception_used": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether a narrow transfer exception is relied on instead of adequate protection or safeguards.",
         "example": false

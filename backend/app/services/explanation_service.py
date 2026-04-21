@@ -22,12 +22,29 @@ def build_summary(
         return base_summary
 
     primary_rule = triggered_rules[0]
-    return f"{base_summary} 핵심 근거는 {primary_rule['article']}의 {primary_rule['title']} 규칙입니다."
+    return f"{base_summary} 핵심 사유: {primary_rule['message']}"
 
 
 def join_rule_messages(triggered_rules: List[Dict[str, Any]], decision: str) -> str:
-    messages = [rule["message"] for rule in triggered_rules if rule["decision"] == decision]
+    messages = [
+        format_rule_explanation(rule)
+        for rule in triggered_rules
+        if rule["decision"] == decision
+    ]
     return " ".join(messages)
+
+
+def format_rule_explanation(rule: Dict[str, Any]) -> str:
+    article = rule.get("article")
+    rationale = rule.get("rationale") or rule["message"]
+    required_actions = rule.get("required_actions", [])
+
+    parts = [f"{article}: {rationale}" if article else rationale]
+
+    if required_actions:
+        parts.append(f"필요 조치: {required_actions[0]}")
+
+    return " ".join(parts)
 
 
 def build_context_sentence(merged_input: Dict[str, Any]) -> str:

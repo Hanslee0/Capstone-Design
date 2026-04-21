@@ -354,17 +354,17 @@ export function GuidedSingleFlowPage() {
   if (screenMode === "result" && evaluationResult) {
     return (
       <main className="app-shell min-h-screen overflow-hidden">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-          <section className="glass-panel rounded-[34px] border border-[var(--color-line)] px-6 py-7 sm:px-8">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
+          <section className="glass-panel rounded-lg border border-[var(--color-line)] px-5 py-6 sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
                   Evaluation Complete
                 </p>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--color-ink)]">
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-4xl">
                   {packDefinition.label} 평가 결과
                 </h1>
-                <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
                   입력을 모두 확인한 뒤 최종 결과를 생성했습니다. 필요하면 다시
                   입력 화면으로 돌아가 수정할 수 있습니다.
                 </p>
@@ -385,7 +385,7 @@ export function GuidedSingleFlowPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
+          <section className="grid gap-5">
             <ResultPanel evaluationResult={evaluationResult} />
             <ExplainabilityPanel
               evaluationResult={evaluationResult}
@@ -393,7 +393,7 @@ export function GuidedSingleFlowPage() {
             />
           </section>
 
-          <footer className="rounded-[28px] border border-[var(--color-line)] bg-[rgba(255,253,248,0.76)] px-6 py-5 text-sm leading-7 text-[var(--color-muted)]">
+          <footer className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] px-5 py-4 text-sm leading-7 text-[var(--color-muted)]">
             <p className="font-semibold text-[var(--color-ink)]">Disclaimer</p>
             <p>
               Border Checker는 정책 기반 의사결정 지원 도구입니다. 실제 운영
@@ -411,7 +411,7 @@ export function GuidedSingleFlowPage() {
       <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-6">
         <header className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="rounded-full border border-[var(--color-accent)] bg-[var(--color-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+            <span className="rounded-md border border-[var(--color-accent)] bg-[var(--color-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">
               Border Checker
             </span>
             <span className="text-sm text-[var(--color-muted)]">
@@ -430,7 +430,7 @@ export function GuidedSingleFlowPage() {
         </header>
 
         <div className="flex flex-1 items-center justify-center">
-          <section className="glass-panel w-full overflow-hidden rounded-[36px] border border-[var(--color-line)] px-6 py-7 sm:px-8 sm:py-8">
+          <section className="glass-panel w-full overflow-hidden rounded-lg border border-[var(--color-line)] px-5 py-6 sm:px-6 sm:py-7">
             <div
               key={`${selectedPackId}-${screenMode}-${stepIndex}`}
               className="screen-enter"
@@ -438,16 +438,14 @@ export function GuidedSingleFlowPage() {
             {screenMode === "intro" ? (
               <div className="space-y-7">
                 <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
                     Step 0
                   </p>
                   <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-4xl">
                     어떤 법제로 검토할지 먼저 선택해 주세요
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
-                    한 번에 모든 질문을 보여주지 않고, 선택한 법제에 맞는 질문만
-                    한 화면씩 차례대로 보여줍니다. 마지막 검토 화면에서만 결과를
-                    생성합니다.
+                    데모 사이트입니다.
                   </p>
                 </div>
 
@@ -459,7 +457,7 @@ export function GuidedSingleFlowPage() {
                         key={pack.pack_id}
                         type="button"
                         onClick={() => setSelectedPackId(pack.pack_id)}
-                        className={`interactive-card rounded-[28px] border p-5 text-left transition ${
+                        className={`interactive-card rounded-lg border p-5 text-left transition ${
                           isActive
                             ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]"
                             : "border-[var(--color-line)] bg-[var(--color-surface-strong)]"
@@ -472,10 +470,10 @@ export function GuidedSingleFlowPage() {
                           {PACK_UI_DEFINITIONS[pack.pack_id]?.subtitle ?? pack.description}
                         </p>
                         <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--color-muted)]">
-                          <span className="rounded-full border border-[var(--color-line)] px-2.5 py-1">
+                          <span className="rounded-md border border-[var(--color-line)] px-2.5 py-1">
                             {pack.jurisdiction}
                           </span>
-                          <span className="rounded-full border border-[var(--color-line)] px-2.5 py-1">
+                          <span className="rounded-md border border-[var(--color-line)] px-2.5 py-1">
                             v{pack.version}
                           </span>
                         </div>
@@ -531,7 +529,7 @@ export function GuidedSingleFlowPage() {
             {screenMode === "step" ? (
               <div className="space-y-7">
                 <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
                     Step {stepIndex + 1}
                   </p>
                   <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink)]">
@@ -558,7 +556,7 @@ export function GuidedSingleFlowPage() {
                   {packDefinition.steps.map((step, index) => (
                     <span
                       key={step.id}
-                      className={`rounded-full border px-3 py-1.5 text-sm ${
+                      className={`rounded-md border px-3 py-1.5 text-sm ${
                         index === stepIndex
                           ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
                           : "border-[var(--color-line)] bg-[var(--color-surface-strong)] text-[var(--color-muted)]"
@@ -618,7 +616,7 @@ export function GuidedSingleFlowPage() {
             {screenMode === "review" ? (
               <div className="space-y-7">
                 <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
                     Final Review
                   </p>
                   <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink)]">
@@ -655,7 +653,7 @@ export function GuidedSingleFlowPage() {
                   {reviewSections.map((section) => (
                     <div
                       key={section.id}
-                      className="rounded-[24px] border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-5"
+                      className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-5"
                     >
                       <p className="text-sm font-semibold text-[var(--color-ink)]">
                         {section.title}

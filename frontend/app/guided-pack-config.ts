@@ -21,41 +21,143 @@ const yesNoUnknownOptions: FieldOption[] = [
   { value: "unknown", label: "잘 모르겠음" },
 ];
 
+const gdprLawfulBasisOptions: FieldOption[] = [
+  ...lawfulBasisOptions,
+  {
+    value: "unknown",
+    label: "잘 모르겠음",
+    description: "법무나 개인정보 담당자가 아직 적법 근거를 확정하지 않은 상태입니다.",
+  },
+];
+
 const gdprSubjectOptions: FieldOption[] = [
-  { value: "EU", label: "EU" },
-  { value: "EEA", label: "EEA" },
-  { value: "UK", label: "UK" },
-  { value: "OTHER", label: "기타" },
+  {
+    value: "EU",
+    label: "EU",
+    description: "프랑스, 독일, 스페인 등 EU 회원국 이용자 또는 임직원 데이터입니다.",
+  },
+  {
+    value: "EEA",
+    label: "EEA",
+    description: "EU와 노르웨이, 아이슬란드, 리히텐슈타인을 포함하는 정보주체 범위입니다.",
+  },
+  {
+    value: "UK",
+    label: "UK",
+    description: "영국 거주자 데이터로, UK GDPR 검토가 별도로 필요할 수 있습니다.",
+  },
+  {
+    value: "OTHER",
+    label: "기타",
+    description: "EU/EEA/UK 외 지역 정보주체이거나 지역을 아직 확정하지 못한 경우입니다.",
+  },
 ];
 
 const saudiDatasetOptions: FieldOption[] = [
-  { value: "ksa_customer_profiles", label: "사우디 고객 프로필" },
-  { value: "ksa_loyalty_events", label: "사우디 멤버십/이벤트 로그" },
-  { value: "ksa_support_cases", label: "사우디 고객지원 케이스" },
-  { value: "ksa_employee_records", label: "사우디 인사 기록" },
-  { value: "ksa_health_service_cases", label: "사우디 건강·민감 케이스" },
+  {
+    value: "ksa_customer_profiles",
+    label: "사우디 고객 프로필",
+    description: "사우디 고객의 이름, 연락처, 계정 상태처럼 서비스 제공에 쓰는 기본정보입니다.",
+  },
+  {
+    value: "ksa_loyalty_events",
+    label: "사우디 멤버십/이벤트 로그",
+    description: "포인트 적립, 쿠폰 사용, 이벤트 참여처럼 멤버십 운영과 분석에 쓰는 로그입니다.",
+  },
+  {
+    value: "ksa_support_cases",
+    label: "사우디 고객지원 케이스",
+    description: "문의 본문, 상담 이력, 처리 결과처럼 고객지원 업무에 필요한 기록입니다.",
+  },
+  {
+    value: "ksa_employee_records",
+    label: "사우디 인사 기록",
+    description: "사우디 임직원 계약, 근태, 급여처럼 접근 권한과 보관기간을 엄격히 봐야 하는 데이터입니다.",
+  },
+  {
+    value: "ksa_health_service_cases",
+    label: "사우디 건강·민감 케이스",
+    description: "건강, 생체, 민감 상담 등 명시적 근거와 추가 보호조치가 필요한 데이터입니다.",
+  },
 ];
 
 const saudiLegalBasisOptions: FieldOption[] = [
-  { value: "consent", label: "동의" },
-  { value: "contractual_necessity", label: "계약 이행 필요" },
-  { value: "legal_obligation", label: "법적 의무" },
-  { value: "public_interest", label: "공익 또는 공공업무" },
-  { value: "vital_interest", label: "중대한 이익 보호" },
-  { value: "legitimate_interest", label: "정당한 이익" },
+  {
+    value: "consent",
+    label: "동의",
+    description: "고객이 특정 처리 목적을 알고 동의했으며 철회 경로도 제공되는 경우입니다.",
+  },
+  {
+    value: "contractual_necessity",
+    label: "계약 이행 필요",
+    description: "배송, 예약, 고객지원처럼 고객과의 계약을 이행하려면 필요한 처리입니다.",
+  },
+  {
+    value: "legal_obligation",
+    label: "법적 의무",
+    description: "세금, 회계, 규제 보고처럼 법령상 보관하거나 제출해야 하는 처리입니다.",
+  },
+  {
+    value: "public_interest",
+    label: "공익 또는 공공업무",
+    description: "공공기관 업무나 법에서 인정하는 공익 목적과 연결된 처리입니다.",
+  },
+  {
+    value: "vital_interest",
+    label: "중대한 이익 보호",
+    description: "생명, 건강, 안전을 보호하기 위해 긴급히 필요한 예외적 처리입니다.",
+  },
+  {
+    value: "legitimate_interest",
+    label: "정당한 이익",
+    description: "부정사용 방지나 보안처럼 이익형량이 필요하며, 민감정보에는 쓰기 어렵습니다.",
+  },
+  {
+    value: "unknown",
+    label: "잘 모르겠음",
+    description: "처리 근거가 아직 문서화되지 않았거나 담당자 확인이 필요한 상태입니다.",
+  },
 ];
 
 const dataSubjectConnectionOptions: FieldOption[] = [
-  { value: "KSA_RESIDENT", label: "사우디 거주자 데이터" },
-  { value: "COLLECTED_IN_KSA", label: "사우디 내 수집 데이터" },
-  { value: "OTHER", label: "사우디 연결성 불명확" },
+  {
+    value: "KSA_RESIDENT",
+    label: "사우디 거주자 데이터",
+    description: "사우디 거주 고객, 직원, 환자 등 사우디 정보주체의 데이터입니다.",
+  },
+  {
+    value: "COLLECTED_IN_KSA",
+    label: "사우디 내 수집 데이터",
+    description: "사우디 매장, 앱, 현지 캠페인에서 수집된 개인정보입니다.",
+  },
+  {
+    value: "OTHER",
+    label: "사우디 연결성 불명확",
+    description: "사우디 거주자 여부나 수집 위치가 아직 확정되지 않은 경우입니다.",
+  },
 ];
 
 const saudiTransferExceptionTypeOptions: FieldOption[] = [
-  { value: "data_subject_contract", label: "정보주체 계약 이행 필요" },
-  { value: "public_interest_public_entity", label: "공공기관 공익 목적" },
-  { value: "crime_detection_public_entity", label: "범죄 수사·집행 목적" },
-  { value: "vital_interest_unreachable", label: "연락 불가 정보주체의 중대한 이익" },
+  {
+    value: "data_subject_contract",
+    label: "정보주체 계약 이행 필요",
+    description: "해외 예약, 배송, 지원처럼 정보주체와의 계약상 꼭 필요한 제한적 이전입니다.",
+  },
+  {
+    value: "public_interest_public_entity",
+    label: "공공기관 공익 목적",
+    description: "공공기관이 법적 권한에 따라 공익 목적으로 수행하는 이전입니다.",
+  },
+  {
+    value: "crime_detection_public_entity",
+    label: "범죄 수사·집행 목적",
+    description: "공공기관의 범죄 탐지, 수사, 집행 목적과 연결된 제한적 이전입니다.",
+  },
+  {
+    value: "vital_interest_unreachable",
+    label: "연락 불가 정보주체의 중대한 이익",
+    description: "정보주체에게 연락할 수 없고 생명·안전 보호가 긴급한 경우입니다.",
+  },
 ];
 
 const gdprElevatedDataTypes = new Set([
@@ -65,7 +167,14 @@ const gdprElevatedDataTypes = new Set([
 ]);
 
 function emptyFirst(options: FieldOption[], placeholder: string) {
-  return [{ value: "", label: placeholder }, ...options];
+  return [
+    {
+      value: "",
+      label: placeholder,
+      description: "아직 선택하지 않은 상태입니다. 실제 업무와 가장 가까운 항목을 고르세요.",
+    },
+    ...options,
+  ];
 }
 
 function missingVisibleRequired(
@@ -117,9 +226,9 @@ const gdprDefaultState: GuidedFormState = {
   other_safeguards_in_place: "unknown",
   transfer_impact_assessment_completed: "unknown",
   supplemental_measures_documented: "unknown",
-  derogation_used: "",
+  derogation_used: "unknown",
   derogation_type: "",
-  encryption_at_rest: "",
+  encryption_at_rest: "unknown",
   encryption_in_transit: "unknown",
   access_control_in_place: "unknown",
   incident_response_in_place: "unknown",
@@ -130,9 +239,9 @@ const gdprDefaultState: GuidedFormState = {
   transfer_documented_in_ropa: "unknown",
   data_subject_rights_process_ready: "unknown",
   privacy_by_design_review_completed: "unknown",
-  dpia_required: "",
+  dpia_required: "unknown",
   dpia_completed: "",
-  dpo_required: "",
+  dpo_required: "unknown",
   dpo_assigned: "",
 };
 
@@ -158,7 +267,7 @@ const saudiDefaultState: GuidedFormState = {
   binding_common_rules_approved: "unknown",
   standard_contractual_clauses_in_place: "unknown",
   certification_or_code_in_place: "unknown",
-  transfer_exception_used: "",
+  transfer_exception_used: "unknown",
   transfer_exception_type: "",
   transfer_risk_assessment_completed: "unknown",
   large_scale_or_continuous_transfer: "unknown",
@@ -167,10 +276,10 @@ const saudiDefaultState: GuidedFormState = {
   processor_compliance_verified: "unknown",
   subprocessor_or_onward_transfer_controls: "unknown",
   records_of_processing_exists: "unknown",
-  dpo_required: "",
+  dpo_required: "unknown",
   dpo_assigned: "",
   processing_impact_assessment_completed: "unknown",
-  encryption_at_rest: "",
+  encryption_at_rest: "unknown",
   encryption_in_transit: "unknown",
   access_control_in_place: "unknown",
   breach_response_72h_ready: "unknown",
@@ -179,8 +288,8 @@ const saudiDefaultState: GuidedFormState = {
 const gdprSteps = [
   {
     id: "context",
-    title: "기본 정보",
-    description: "어떤 데이터를 어디서 어디로 옮기는지부터 선택합니다.",
+    title: "무엇을 어디로 보내나요?",
+    description: "사업자가 아는 수준에서 데이터 종류와 저장·이전 위치만 먼저 고릅니다.",
     fields: [
       { key: "dataset_name", label: "데이터셋", helper: "검토 대상 업무 데이터를 고르세요.", kind: "select", options: emptyFirst(datasetOptions, "데이터셋 선택"), required: true },
       { key: "data_type", label: "데이터 유형", helper: "데이터 성격을 고르세요.", kind: "select", options: emptyFirst(dataTypeOptions, "데이터 유형 선택"), required: true },
@@ -191,42 +300,42 @@ const gdprSteps = [
   },
   {
     id: "lawfulness",
-    title: "처리 근거와 데이터 성격",
-    description: "왜 처리하는지, 민감정보인지, 최소화와 보관기준이 있는지 확인합니다.",
+    title: "왜 쓰고 얼마나 보관하나요?",
+    description: "정확한 법률 용어를 몰라도 괜찮습니다. 모르는 항목은 잘 모르겠음으로 남기면 보완 과제로 안내합니다.",
     fields: [
-      { key: "lawful_basis", label: "적법 근거", helper: "GDPR 제6조 기준을 선택합니다.", kind: "select", options: emptyFirst(lawfulBasisOptions, "적법 근거 선택"), required: true },
-      { key: "processing_purpose_defined", label: "처리 목적 정의", helper: "문서로 정리되어 있나요?", kind: "segmented", options: yesNoOptions, required: true },
-      { key: "data_minimized", label: "데이터 최소화", helper: "필요 최소 범위만 이전하나요?", kind: "segmented", options: yesNoOptions, required: true },
-      { key: "retention_period_defined", label: "보관기간 정의", helper: "삭제 또는 보존 주기가 있나요?", kind: "segmented", options: yesNoOptions, required: true },
-      { key: "contains_sensitive_data", label: "민감정보 포함", helper: "건강정보 등 민감정보가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
-      { key: "special_category_condition_met", label: "민감정보 예외 요건", helper: "민감정보라면 제9조 예외 요건이 확인됐나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" }
+      { key: "lawful_basis", label: "왜 이 데이터를 써도 되나요?", helper: "계약 이행, 동의, 법적 의무처럼 가장 가까운 이유를 고르세요.", kind: "select", options: emptyFirst(gdprLawfulBasisOptions, "이유 선택"), required: true },
+      { key: "processing_purpose_defined", label: "사용 목적이 정해져 있나요?", helper: "예: 주문 처리, 고객지원, 분석처럼 내부에서 설명할 수 있나요?", kind: "segmented", options: yesNoUnknownOptions, required: true },
+      { key: "data_minimized", label: "꼭 필요한 데이터만 보내나요?", helper: "전체 DB가 아니라 필요한 필드만 보내는지 확인합니다.", kind: "segmented", options: yesNoUnknownOptions, required: true },
+      { key: "retention_period_defined", label: "언제까지 보관할지 정했나요?", helper: "삭제 시점이나 보관 기준이 있으면 예를 선택하세요.", kind: "segmented", options: yesNoUnknownOptions, required: true },
+      { key: "contains_sensitive_data", label: "민감한 정보가 들어 있나요?", helper: "건강, 인사, 결제, 아동, 생체정보처럼 조심해야 할 정보가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
+      { key: "special_category_condition_met", label: "민감정보를 써도 되는 근거가 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두고 결과에서 확인 과제로 받으세요.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" }
     ]
   },
   {
     id: "transfer",
-    title: "이전 메커니즘",
-    description: "외부 처리자, SCC/BCR, 위험평가, 예외 경로를 필요한 경우에만 묻습니다.",
+    title: "외부 업체나 해외 이전 근거가 있나요?",
+    description: "SCC, BCR 같은 단어가 낯설면 잘 모르겠음으로 답해도 됩니다. 시스템이 필요한 문서 목록으로 바꿔 줍니다.",
     fields: [
-      { key: "uses_processor", label: "외부 처리자 사용", helper: "벤더 또는 위탁처리가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
-      { key: "controller_processor_roles_defined", label: "역할 정의", helper: "컨트롤러/프로세서 역할이 문서화되어 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
-      { key: "dpa_in_place", label: "DPA 체결", helper: "수탁자 계약이 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
-      { key: "processor_sufficient_guarantees", label: "수탁자 보증 확인", helper: "보안/개인정보 보호 보증을 확인했나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "uses_processor", label: "외부 서비스나 업체가 처리하나요?", helper: "예: AWS, SaaS, 외주 개발사, 분석 도구, 고객지원 도구", kind: "segmented", options: yesNoUnknownOptions },
+      { key: "controller_processor_roles_defined", label: "우리와 업체의 역할이 정해졌나요?", helper: "누가 결정권자이고 누가 대신 처리하는지 계약이나 문서에 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "dpa_in_place", label: "업체와 개인정보 처리 계약이 있나요?", helper: "DPA 또는 개인정보 처리 위탁/수탁 계약이 있으면 예를 선택하세요.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "processor_sufficient_guarantees", label: "업체의 보안 자료를 확인했나요?", helper: "보안 인증, 개인정보 보호 조항, 감사 자료 등을 확인했나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
       { key: "subprocessor_controls_in_place", label: "하위처리자 통제", helper: "재위탁 또는 재이전 통제가 계약에 반영됐나요?", tooltip: "벤더가 다시 다른 업체를 쓰는 경우 사전 승인, 통지, 감사권 조항을 주로 봅니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
-      { key: "scc_in_place", label: "SCC 체결", helper: "표준계약조항이 있나요?", tooltip: "EU 밖 이전에서 가장 자주 보는 계약형 이전 메커니즘입니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
+      { key: "scc_in_place", label: "표준계약조항을 체결했나요?", helper: "EU 밖으로 보낼 때 자주 쓰는 계약 장치입니다.", tooltip: "EU 밖 이전에서 가장 자주 보는 계약형 이전 메커니즘입니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
       { key: "bcr_in_place", label: "BCR 보유", helper: "그룹 내부 이전용 BCR이 있나요?", tooltip: "같은 기업집단 내부 이전에서 쓰는 승인된 내부 규칙입니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
       { key: "other_safeguards_in_place", label: "기타 보호조치", helper: "다른 제46조 보호조치가 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
       { key: "transfer_impact_assessment_completed", label: "이전 영향 평가", helper: "TIA를 완료했나요?", tooltip: "대상국 법·집행 환경과 계약 보호조치 실효성을 점검하는 문서입니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
       { key: "supplemental_measures_documented", label: "보완조치 문서화", helper: "추가 보호조치가 정리되어 있나요?", tooltip: "암호화, 분리보관, 계약상 제한 같은 추가 통제를 뜻합니다.", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isGdprCrossBorderContext },
-      { key: "derogation_used", label: "예외 이전 사용", helper: "제49조 예외를 직접 쓰나요?", tooltip: "반복 운영보다는 예외적 상황에서만 좁게 쓰는 경로입니다.", kind: "segmented", options: yesNoOptions, required: true, visibleIf: isGdprCrossBorderContext },
+      { key: "derogation_used", label: "예외 사유로 보내는 건가요?", helper: "일회성·긴급·계약상 꼭 필요한 이전처럼 예외 경로를 쓰는지 확인합니다.", tooltip: "반복 운영보다는 예외적 상황에서만 좁게 쓰는 경로입니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: isGdprCrossBorderContext },
       { key: "derogation_type", label: "예외 유형", helper: "예외 사용 시 세부 유형을 고르세요.", kind: "select", options: emptyFirst(derogationTypeOptions, "예외 유형 선택"), visibleIf: (state: GuidedFormState) => isGdprCrossBorderContext(state) && state.derogation_used === "true" }
     ]
   },
   {
     id: "controls",
-    title: "보안과 문서",
-    description: "실제 운영 통제와 고지·기록 상태를 마지막으로 정리합니다.",
+    title: "기본 보안과 고객 안내는 준비됐나요?",
+    description: "기술 세부사항을 몰라도 괜찮습니다. 모르면 보안 담당자에게 확인할 항목으로 넘깁니다.",
     fields: [
-      { key: "encryption_at_rest", label: "저장 시 암호화", helper: "필수 항목입니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "encryption_at_rest", label: "저장된 데이터가 암호화되어 있나요?", helper: "AWS/SaaS 설정을 모르면 잘 모르겠음으로 두세요.", kind: "segmented", options: yesNoUnknownOptions, required: true },
       { key: "encryption_in_transit", label: "전송 시 암호화", helper: "TLS 등이 적용되나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "access_control_in_place", label: "접근통제", helper: "접근권한 통제가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "incident_response_in_place", label: "침해 대응 절차", helper: "사고 대응 절차가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
@@ -239,14 +348,14 @@ const gdprSteps = [
   },
   {
     id: "governance",
-    title: "권리와 책임성",
-    description: "권리 대응, 프라이버시 설계, DPIA/DPO 같은 운영 책임성 항목을 확인합니다.",
+    title: "담당자가 추가로 봐야 할 일이 있나요?",
+    description: "DPIA나 DPO 같은 전문 항목은 모르면 잘 모르겠음으로 두고 결과에서 담당자 확인 과제로 넘깁니다.",
     fields: [
       { key: "data_subject_rights_process_ready", label: "정보주체 권리 대응", helper: "열람·정정·삭제 요청 대응 절차가 있나요?", tooltip: "사업자가 실제 요청을 받았을 때 누가 무엇을 처리하는지 정리된 상태를 뜻합니다.", kind: "segmented", options: yesNoUnknownOptions },
       { key: "privacy_by_design_review_completed", label: "프라이버시 설계 검토", helper: "기본값 최소화·접근제한 검토를 했나요?", tooltip: "제품 설계 자체가 개인정보 최소화 원칙을 따르는지 보는 항목입니다.", kind: "segmented", options: yesNoUnknownOptions },
-      { key: "dpia_required", label: "DPIA 필요 여부", helper: "고위험 처리라서 DPIA가 필요한가요?", tooltip: "민감정보, 대규모 처리, 고위험 설계면 예를 검토합니다.", kind: "segmented", options: yesNoOptions, required: true, visibleIf: needsGdprElevatedGovernanceQuestions },
+      { key: "dpia_required", label: "사전 영향평가가 필요한지 알고 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두세요.", tooltip: "민감정보, 대규모 처리, 고위험 설계면 예를 검토합니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: needsGdprElevatedGovernanceQuestions },
       { key: "dpia_completed", label: "DPIA 완료", helper: "필요한 경우 실제로 완료했나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.dpia_required === "true" },
-      { key: "dpo_required", label: "DPO 지정 필요 여부", helper: "DPO가 필요한 시나리오인가요?", tooltip: "대규모 모니터링, 민감정보 대규모 처리 등에서는 필요할 수 있습니다.", kind: "segmented", options: yesNoOptions, required: true, visibleIf: needsGdprElevatedGovernanceQuestions },
+      { key: "dpo_required", label: "개인정보 보호 책임자 지정이 필요한지 알고 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두세요.", tooltip: "대규모 모니터링, 민감정보 대규모 처리 등에서는 필요할 수 있습니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: needsGdprElevatedGovernanceQuestions },
       { key: "dpo_assigned", label: "DPO 지정 완료", helper: "필요한 경우 실제 지정했나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.dpo_required === "true" }
     ]
   }
@@ -255,8 +364,8 @@ const gdprSteps = [
 const saudiSteps = [
   {
     id: "context",
-    title: "기본 정보",
-    description: "사우디와 어떤 연결성이 있고 데이터가 어디로 이동하는지 먼저 확인합니다.",
+    title: "무엇을 어디로 보내나요?",
+    description: "사우디와 어떤 관련이 있는 데이터인지, 현재 위치와 대상 위치만 먼저 고릅니다.",
     fields: [
       { key: "dataset_name", label: "데이터셋", helper: "검토 대상 데이터를 고르세요.", kind: "select", options: emptyFirst(saudiDatasetOptions, "데이터셋 선택"), required: true },
       { key: "data_type", label: "데이터 유형", helper: "데이터 성격을 고르세요.", kind: "select", options: emptyFirst(dataTypeOptions, "데이터 유형 선택"), required: true },
@@ -267,13 +376,13 @@ const saudiSteps = [
   },
   {
     id: "lawfulness",
-    title: "처리 근거와 고지",
-    description: "사우디 PDPL에서 중요하게 보는 처리 근거, 목적, 민감정보, 고지 상태를 정리합니다.",
+    title: "왜 쓰고 고객에게 알렸나요?",
+    description: "정확한 법률 근거를 몰라도 잘 모르겠음으로 진행할 수 있습니다. 결과에서 보완 과제로 안내합니다.",
     fields: [
-      { key: "processing_legal_basis", label: "처리 근거", helper: "사우디 PDPL상 근거를 선택합니다.", kind: "select", options: emptyFirst(saudiLegalBasisOptions, "처리 근거 선택"), required: true },
-      { key: "processing_purpose_defined", label: "처리 목적 정의", helper: "목적이 문서화되어 있나요?", kind: "segmented", options: yesNoOptions, required: true },
-      { key: "data_minimized", label: "데이터 최소화", helper: "이전에 필요한 최소 범위인가요?", kind: "segmented", options: yesNoOptions, required: true },
-      { key: "retention_period_defined", label: "보관·파기 주기", helper: "보관기간이나 파기 기준이 있나요?", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "processing_legal_basis", label: "왜 이 데이터를 써도 되나요?", helper: "동의, 계약 이행, 법적 의무처럼 가장 가까운 이유를 고르세요.", kind: "select", options: emptyFirst(saudiLegalBasisOptions, "이유 선택"), required: true },
+      { key: "processing_purpose_defined", label: "사용 목적이 정해져 있나요?", helper: "예: 주문 처리, 고객지원, 멤버십 운영처럼 설명할 수 있나요?", kind: "segmented", options: yesNoUnknownOptions, required: true },
+      { key: "data_minimized", label: "꼭 필요한 데이터만 보내나요?", helper: "목적에 필요한 최소 항목만 이전하는지 확인합니다.", kind: "segmented", options: yesNoUnknownOptions, required: true },
+      { key: "retention_period_defined", label: "언제까지 보관할지 정했나요?", helper: "보관기간이나 파기 기준이 있으면 예를 선택하세요.", kind: "segmented", options: yesNoUnknownOptions, required: true },
       { key: "contains_sensitive_data", label: "민감정보 포함", helper: "민감정보가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "explicit_consent_for_sensitive_data", label: "민감정보 명시적 동의", helper: "민감정보를 동의 기반으로 처리한다면 명시적 동의가 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" && state.processing_legal_basis === "consent" },
       { key: "privacy_policy_available", label: "개인정보 처리방침", helper: "서비스 기준 처리방침이 준비되어 있나요?", kind: "segmented", options: yesNoUnknownOptions },
@@ -286,14 +395,14 @@ const saudiSteps = [
   },
   {
     id: "transfer",
-    title: "국외이전 경로",
-    description: "적정 보호 수준, 승인된 보호조치, 예외 경로, 위험평가 여부를 순서대로 확인합니다.",
+    title: "사우디 밖으로 보내는 근거가 있나요?",
+    description: "전문 용어가 낯설면 잘 모르겠음으로 답해도 됩니다. 필요한 문서와 담당자 확인 항목으로 바꿔 줍니다.",
     fields: [
       { key: "adequate_protection_confirmed", label: "적정 보호 수준 확인", helper: "대상국 보호수준이 공식적으로 확인됐나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isSaudiCrossBorderContext },
       { key: "binding_common_rules_approved", label: "승인된 공통구속규칙", helper: "BCR 성격의 승인된 규칙이 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isSaudiCrossBorderContext },
       { key: "standard_contractual_clauses_in_place", label: "표준계약조항", helper: "사우디 기준 표준계약조항이 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isSaudiCrossBorderContext },
       { key: "certification_or_code_in_place", label: "인증/행동강령 보호조치", helper: "인증이나 승인된 행동강령이 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isSaudiCrossBorderContext },
-      { key: "transfer_exception_used", label: "예외 경로 사용", helper: "보호조치 대신 예외 경로를 사용하나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: isSaudiCrossBorderContext },
+      { key: "transfer_exception_used", label: "예외 사유로 보내는 건가요?", helper: "보호조치 대신 예외 경로를 쓰는지 확인합니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: isSaudiCrossBorderContext },
       { key: "transfer_exception_type", label: "예외 유형", helper: "예외 사용 시 세부 유형을 고르세요.", kind: "select", options: emptyFirst(saudiTransferExceptionTypeOptions, "예외 유형 선택"), visibleIf: (state: GuidedFormState) => isSaudiCrossBorderContext(state) && state.transfer_exception_used === "true" },
       { key: "large_scale_or_continuous_transfer", label: "대규모/지속적 이전", helper: "특히 민감정보를 계속 이전하나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "transfer_risk_assessment_completed", label: "국외이전 위험평가 완료", helper: "위험평가를 완료했나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: isSaudiCrossBorderContext }
@@ -301,14 +410,14 @@ const saudiSteps = [
   },
   {
     id: "controls",
-    title: "수탁자와 운영 통제",
-    description: "프로세서 검증, 기록, DPO, 보안과 브리치 대응 상태를 마지막으로 확인합니다.",
+    title: "업체, 보안, 사고 대응은 준비됐나요?",
+    description: "모르는 기술 항목은 막히지 않고 보완 확인 항목으로 넘깁니다.",
     fields: [
       { key: "uses_processor", label: "외부 처리자 사용", helper: "벤더 또는 위탁처리가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "processor_agreement_in_place", label: "프로세서 계약", helper: "계약 또는 서면 조건이 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
       { key: "processor_compliance_verified", label: "프로세서 준수 검증", helper: "실사나 검증을 했나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
       { key: "subprocessor_or_onward_transfer_controls", label: "재이전/하위처리자 통제", helper: "하위처리자와 재이전 통제가 있나요?", kind: "segmented", options: yesNoUnknownOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
-      { key: "encryption_at_rest", label: "저장 시 암호화", helper: "필수 항목입니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "encryption_at_rest", label: "저장된 데이터가 암호화되어 있나요?", helper: "클라우드나 SaaS 설정을 모르면 잘 모르겠음으로 두세요.", kind: "segmented", options: yesNoUnknownOptions, required: true },
       { key: "encryption_in_transit", label: "전송 시 암호화", helper: "TLS 등이 적용되나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "access_control_in_place", label: "접근통제", helper: "접근권한 통제가 있나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "breach_response_72h_ready", label: "72시간 내 브리치 대응 준비", helper: "사고 대응과 통지 체계가 있나요?", kind: "segmented", options: yesNoUnknownOptions }
@@ -316,12 +425,12 @@ const saudiSteps = [
   },
   {
     id: "governance",
-    title: "책임성과 내부 검토",
-    description: "기록, 영향평가, DPO 필요성 같은 내부 책임성 항목을 정리합니다.",
+    title: "담당자가 추가로 봐야 할 일이 있나요?",
+    description: "영향평가나 DPO 같은 전문 항목은 모르면 결과에서 담당자 확인 과제로 넘깁니다.",
     fields: [
       { key: "records_of_processing_exists", label: "처리 기록 보유", helper: "처리 활동 기록이 있나요?", kind: "segmented", options: yesNoUnknownOptions },
       { key: "processing_impact_assessment_completed", label: "내부 영향 검토", helper: "내부 평가나 영향 검토를 했나요?", kind: "segmented", options: yesNoUnknownOptions },
-      { key: "dpo_required", label: "DPO 지정 필요", helper: "공식 기준상 DPO가 필요한가요?", tooltip: "민감정보나 대규모 처리라면 공식 기준에 따라 먼저 판단하는 편이 좋습니다.", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" || state.large_scale_or_continuous_transfer === "true" },
+      { key: "dpo_required", label: "개인정보 보호 책임자 지정이 필요한지 알고 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두세요.", tooltip: "민감정보나 대규모 처리라면 공식 기준에 따라 먼저 판단하는 편이 좋습니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" || state.large_scale_or_continuous_transfer === "true" },
       { key: "dpo_assigned", label: "DPO 지정 완료", helper: "필요한 경우 실제 지정했나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.dpo_required === "true" }
     ]
   }
@@ -332,7 +441,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
     id: "gdpr",
     label: "EU GDPR",
     subtitle: "EU/EEA 국외이전 평가",
-    storageKey: "border-checker-guided-gdpr-v2",
+    storageKey: "border-checker-guided-gdpr-v3",
     steps: gdprSteps as unknown as PackUiDefinition["steps"],
     defaultState: gdprDefaultState,
     validate: (state) => {
@@ -353,7 +462,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
       return {
         aws_data: {
           current_region: state.current_region,
-          encryption_at_rest: toRequiredBoolean(state.encryption_at_rest, "저장 시 암호화"),
+          encryption_at_rest: toNullableBoolean(state.encryption_at_rest),
           data_type: state.data_type,
           contains_sensitive_data: toNullableBoolean(state.contains_sensitive_data),
           uses_processor: toNullableBoolean(state.uses_processor),
@@ -363,10 +472,10 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
         policy_data: {
           dataset_name: state.dataset_name,
           data_subject_region: state.data_subject_region,
-          processing_purpose_defined: toRequiredBoolean(state.processing_purpose_defined, "처리 목적 정의"),
-          data_minimized: toRequiredBoolean(state.data_minimized, "데이터 최소화"),
-          retention_period_defined: toRequiredBoolean(state.retention_period_defined, "보관기간 정의"),
-          lawful_basis: state.lawful_basis || null,
+          processing_purpose_defined: toNullableBoolean(state.processing_purpose_defined),
+          data_minimized: toNullableBoolean(state.data_minimized),
+          retention_period_defined: toNullableBoolean(state.retention_period_defined),
+          lawful_basis: state.lawful_basis === "unknown" ? null : state.lawful_basis || null,
           special_category_condition_met: toNullableBoolean(state.special_category_condition_met),
           target_region: state.target_region,
           controller_processor_roles_defined: toNullableBoolean(state.controller_processor_roles_defined),
@@ -381,7 +490,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
           incident_response_in_place: toNullableBoolean(state.incident_response_in_place),
           breach_notification_ready_72h: toNullableBoolean(state.breach_notification_ready_72h),
           derogation_used: crossBorder
-            ? toRequiredBoolean(state.derogation_used, "예외 이전 사용")
+            ? toNullableBoolean(state.derogation_used)
             : false,
           derogation_type:
             crossBorder && state.derogation_used === "true"
@@ -393,12 +502,12 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
           transfer_documented_in_ropa: toNullableBoolean(state.transfer_documented_in_ropa),
           data_subject_rights_process_ready: toNullableBoolean(state.data_subject_rights_process_ready),
           privacy_by_design_review_completed: toNullableBoolean(state.privacy_by_design_review_completed),
-          dpia_required: state.dpia_required ? toRequiredBoolean(state.dpia_required, "DPIA 필요 여부") : null,
+          dpia_required: toNullableBoolean(state.dpia_required),
           dpia_completed:
             state.dpia_required === "true" && state.dpia_completed
               ? toRequiredBoolean(state.dpia_completed, "DPIA 완료")
               : null,
-          dpo_required: state.dpo_required ? toRequiredBoolean(state.dpo_required, "DPO 지정 필요 여부") : null,
+          dpo_required: toNullableBoolean(state.dpo_required),
           dpo_assigned:
             state.dpo_required === "true" && state.dpo_assigned
               ? toRequiredBoolean(state.dpo_assigned, "DPO 지정 완료")
@@ -428,7 +537,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
     buildSummaryRows: (state) => [
       { label: "데이터셋", value: getOptionLabel(datasetOptions, state.dataset_name) },
       { label: "리전 흐름", value: state.current_region && state.target_region ? `${state.current_region} -> ${state.target_region}` : "미선택" },
-      { label: "적법 근거", value: getOptionLabel(lawfulBasisOptions, state.lawful_basis) },
+      { label: "처리 이유", value: getOptionLabel(gdprLawfulBasisOptions, state.lawful_basis) },
       { label: "민감정보", value: state.contains_sensitive_data === "true" ? "포함" : state.contains_sensitive_data === "false" ? "미포함" : "미확인" }
     ]
   },
@@ -436,7 +545,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
     id: "saudi_pdpl",
     label: "Saudi PDPL",
     subtitle: "사우디 국외이전 평가",
-    storageKey: "border-checker-guided-saudi-v2",
+    storageKey: "border-checker-guided-saudi-v3",
     steps: saudiSteps as unknown as PackUiDefinition["steps"],
     defaultState: saudiDefaultState,
     validate: (state) => {
@@ -457,7 +566,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
       return {
         aws_data: {
           current_region: state.current_region,
-          encryption_at_rest: toRequiredBoolean(state.encryption_at_rest, "저장 시 암호화"),
+          encryption_at_rest: toNullableBoolean(state.encryption_at_rest),
           data_type: state.data_type,
           contains_sensitive_data: toNullableBoolean(state.contains_sensitive_data),
           uses_processor: toNullableBoolean(state.uses_processor),
@@ -467,10 +576,10 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
         policy_data: {
           dataset_name: state.dataset_name,
           data_subject_connection: state.data_subject_connection,
-          processing_purpose_defined: toRequiredBoolean(state.processing_purpose_defined, "처리 목적 정의"),
-          data_minimized: toRequiredBoolean(state.data_minimized, "데이터 최소화"),
-          retention_period_defined: toRequiredBoolean(state.retention_period_defined, "보관·파기 주기"),
-          processing_legal_basis: state.processing_legal_basis || null,
+          processing_purpose_defined: toNullableBoolean(state.processing_purpose_defined),
+          data_minimized: toNullableBoolean(state.data_minimized),
+          retention_period_defined: toNullableBoolean(state.retention_period_defined),
+          processing_legal_basis: state.processing_legal_basis === "unknown" ? null : state.processing_legal_basis || null,
           explicit_consent_for_sensitive_data: toNullableBoolean(state.explicit_consent_for_sensitive_data),
           privacy_policy_available: toNullableBoolean(state.privacy_policy_available),
           data_subject_rights_request_ready: toNullableBoolean(state.data_subject_rights_request_ready),
@@ -484,7 +593,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
           standard_contractual_clauses_in_place: toNullableBoolean(state.standard_contractual_clauses_in_place),
           certification_or_code_in_place: toNullableBoolean(state.certification_or_code_in_place),
           transfer_exception_used: crossBorder
-            ? toRequiredBoolean(state.transfer_exception_used, "예외 경로 사용")
+            ? toNullableBoolean(state.transfer_exception_used)
             : false,
           transfer_exception_type:
             crossBorder && state.transfer_exception_used === "true"
@@ -496,7 +605,7 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
           processor_compliance_verified: toNullableBoolean(state.processor_compliance_verified),
           subprocessor_or_onward_transfer_controls: toNullableBoolean(state.subprocessor_or_onward_transfer_controls),
           records_of_processing_exists: toNullableBoolean(state.records_of_processing_exists),
-          dpo_required: state.dpo_required ? toRequiredBoolean(state.dpo_required, "DPO 지정 필요") : null,
+          dpo_required: toNullableBoolean(state.dpo_required),
           dpo_assigned:
             state.dpo_required === "true" && state.dpo_assigned
               ? toRequiredBoolean(state.dpo_assigned, "DPO 지정 완료")

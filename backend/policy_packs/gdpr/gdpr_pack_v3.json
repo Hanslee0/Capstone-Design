@@ -206,6 +206,47 @@
       "explanation_template": "제3국 이전 자체는 확인되었지만 이를 정당화할 이전 메커니즘이 보이지 않습니다."
     },
     {
+      "rule_id": "gdpr-art-44-transfer-mechanism-unknown",
+      "article": "GDPR Art. 44",
+      "title": "Transfer mechanism answer is incomplete",
+      "category": "transfer_mechanism",
+      "priority": 94,
+      "decision": "manual_review",
+      "when": {
+        "all": [
+          {
+            "field": "is_third_country_transfer",
+            "eq": true
+          },
+          {
+            "field": "adequacy_decision_exists",
+            "eq": false
+          },
+          {
+            "field": "transfer_safeguards_available",
+            "eq": false
+          },
+          {
+            "field": "derogation_used",
+            "is_null": true
+          }
+        ]
+      },
+      "required_evidence": [
+        "적정성 결정, SCC/BCR 등 보호조치, 또는 제49조 예외 사용 여부"
+      ],
+      "required_actions": [
+        "국외이전 근거를 모르는 경우 이전 메커니즘을 먼저 확인하고 법무 또는 프라이버시 담당자 검토를 받으세요."
+      ],
+      "message": "제3국 이전으로 보이지만 어떤 이전 근거를 쓰는지 확인되지 않아 수동 검토가 필요합니다.",
+      "references": [
+        "General principle for transfers"
+      ],
+      "reviewer_notes": [
+        "초보 사용자가 모름으로 답한 경우 SCC, BCR, 적정성, 예외 이전 중 실제 경로를 먼저 확인하세요."
+      ]
+    },
+    {
       "rule_id": "gdpr-target-country-unknown",
       "article": "GDPR Art. 44",
       "title": "Unsupported or unmapped target jurisdiction",
@@ -558,7 +599,7 @@
       "decision": "condition_allow",
       "when": {
         "field": "processing_purpose_defined",
-        "eq": false
+        "neq": true
       },
       "required_evidence": [
         "처리 목적 정의 문서"
@@ -580,7 +621,7 @@
       "decision": "condition_allow",
       "when": {
         "field": "data_minimized",
-        "eq": false
+        "neq": true
       },
       "required_evidence": [
         "수집 항목 필요성 검토 기록"
@@ -602,7 +643,7 @@
       "decision": "condition_allow",
       "when": {
         "field": "retention_period_defined",
-        "eq": false
+        "neq": true
       },
       "required_evidence": [
         "보관 및 삭제 주기 정책"

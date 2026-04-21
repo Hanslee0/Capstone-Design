@@ -14,7 +14,10 @@
           "source": "aws_config"
         },
         "encryption_at_rest": {
-          "type": "boolean",
+          "type": [
+            "boolean",
+            "null"
+          ],
           "required": true,
           "description": "Whether encryption at rest is enabled for the target dataset or resource.",
           "example": true,
@@ -100,19 +103,28 @@
         "example": "EU"
       },
       "processing_purpose_defined": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether the purpose of processing is clearly defined and documented.",
         "example": true
       },
       "data_minimized": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether only necessary personal data is processed for the stated purpose.",
         "example": true
       },
       "retention_period_defined": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether retention or deletion period is documented.",
         "example": true
@@ -286,7 +298,10 @@
         "example": true
       },
       "derogation_used": {
-        "type": "boolean",
+        "type": [
+          "boolean",
+          "null"
+        ],
         "required": true,
         "description": "Whether the transfer relies on an Article 49 derogation.",
         "example": false

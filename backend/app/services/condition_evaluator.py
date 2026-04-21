@@ -118,7 +118,7 @@ def evaluate_condition_with_trace(
             field=field,
             actual=actual,
             matched=actual != expected,
-            expectation=f"{format_value(expected)}이 아님",
+            expectation=f"{format_value(expected)}가 아님",
         )
 
     if "in" in condition:

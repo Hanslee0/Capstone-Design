@@ -2,6 +2,7 @@ import unittest
 
 from app.services.evaluation_service import evaluate_rules
 from app.services.pack_loader import load_gdpr_pack, load_pack
+from app.services.request_merge_service import build_merged_input_from_request
 
 
 def build_base_input() -> dict:
@@ -143,6 +144,48 @@ class EvaluationServiceTests(unittest.TestCase):
         self.assertEqual(result["final_decision"], "condition_allow")
         self.assertIn("GDPR Art. 5", result["legal_basis_articles"])
 
+    def test_beginner_unknown_core_answers_are_accepted_by_schema(self):
+        merged_input = build_merged_input_from_request(
+            pack_id="gdpr",
+            aws_data={
+                "current_region": "eu-central-1",
+                "encryption_at_rest": None,
+                "data_type": "customer_profiles",
+                "contains_sensitive_data": None,
+                "uses_processor": None,
+                "encryption_in_transit": None,
+                "access_control_in_place": None,
+            },
+            policy_data={
+                "dataset_name": "beginner-dataset",
+                "data_subject_region": "EU",
+                "processing_purpose_defined": None,
+                "data_minimized": None,
+                "retention_period_defined": None,
+                "lawful_basis": None,
+                "target_region": "us-east-1",
+                "derogation_used": None,
+            },
+        )
+
+        self.assertIsNone(merged_input["processing_purpose_defined"])
+        self.assertIsNone(merged_input["encryption_at_rest"])
+        self.assertIsNone(merged_input["derogation_used"])
+
+    def test_unknown_transfer_mechanism_routes_to_manual_review(self):
+        pack_data = load_gdpr_pack("gdpr_pack_v3.json")
+        merged_input = build_base_input()
+        merged_input["target_region"] = "us-east-1"
+        merged_input["target_country"] = "US"
+        merged_input["adequacy_decision_exists"] = False
+        merged_input["is_third_country_transfer"] = True
+        merged_input["derogation_used"] = None
+
+        result = evaluate_rules(merged_input=merged_input, pack_data=pack_data)
+
+        self.assertEqual(result["final_decision"], "manual_review")
+        self.assertIn("GDPR Art. 44", result["legal_basis_articles"])
+
     def test_required_actions_are_deduplicated(self):
         merged_input = build_base_input()
         merged_input["flag_a"] = True
@@ -239,6 +282,22 @@ class EvaluationServiceTests(unittest.TestCase):
         result = evaluate_rules(merged_input=merged_input, pack_data=pack_data)
 
         self.assertEqual(result["final_decision"], "deny")
+        self.assertIn(
+            "PDPL Art. 29 / Transfer Regulation Art. 5 / Art. 6",
+            result["legal_basis_articles"],
+        )
+
+    def test_saudi_unknown_transfer_path_routes_to_manual_review(self):
+        pack_data = load_pack("saudi_pdpl")
+        merged_input = build_saudi_base_input()
+        merged_input["target_region"] = "us-east-1"
+        merged_input["target_country"] = "US"
+        merged_input["transfer_outside_kingdom"] = True
+        merged_input["transfer_exception_used"] = None
+
+        result = evaluate_rules(merged_input=merged_input, pack_data=pack_data)
+
+        self.assertEqual(result["final_decision"], "manual_review")
         self.assertIn(
             "PDPL Art. 29 / Transfer Regulation Art. 5 / Art. 6",
             result["legal_basis_articles"],
