@@ -10,6 +10,58 @@ import { getOptionLabel, toNullableBoolean, toRequiredBoolean } from "./workspac
 import type { FieldOption } from "./workspace-types";
 import type { GuidedField, GuidedFormState, PackUiDefinition } from "./guided-pack-types";
 
+// 🇹🇼 대만 특화 선택지
+const taiwanAgencyOptions: FieldOption[] = [
+  { value: "government_agency", label: "공공 기관(정부)", description: "정부 및 공공 부문 기관입니다." },
+  { value: "non_government_agency", label: "비공공 기관(일반 기업)", description: "일반 민간 기업 및 단체입니다." },
+];
+
+const taiwanBasisOptions: FieldOption[] = [
+  { value: "contract_or_quasi_contract_with_security", label: "계약 이행 및 보안조치", description: "계약 이행을 위해 필요하며 적절한 보안 조치가 있습니다." },
+  { value: "consent", label: "정보주체 동의", description: "정보주체의 명시적인 동의를 받았습니다." },
+  { value: "legal_obligation", label: "법적 의무", description: "대만 법령에 따른 의무 이행입니다." },
+];
+
+// 🇧🇷 브라질 특화 선택지
+const lgpdBasisOptions: FieldOption[] = [
+  { value: "consent", label: "동의 (제7조 I항)", description: "정보주체의 특정하고 명시적인 동의가 있습니다." },
+  { value: "legitimate_interest", label: "정당한 이익 (제7조 IX항)", description: "컨트롤러의 정당한 이익을 위해 필요합니다." },
+  { value: "contract", label: "계약 이행 (제7조 V항)", description: "정보주체가 당사자인 계약 이행에 필요합니다." },
+];
+
+const pipaLawfulBasisOptions: FieldOption[] = [
+  {
+    value: "consent",
+    label: "동의",
+    description: "정보주체의 동의를 받은 경우입니다.",
+  },
+  {
+    value: "statutory_basis",
+    label: "법령상 근거",
+    description: "법률에 특별한 규정이 있거나 법령상 의무 준수에 필요한 경우입니다.",
+  },
+  {
+    value: "public_task",
+    label: "공공업무 수행",
+    description: "공공기관이 법령 등에서 정한 소관 업무 수행을 위해 필요한 경우입니다.",
+  },
+  {
+    value: "contract",
+    label: "계약 이행",
+    description: "계약 체결 또는 이행을 위해 필요한 경우입니다.",
+  },
+  {
+    value: "vital_interest",
+    label: "급박한 생명·신체·재산상 이익",
+    description: "정보주체 또는 제3자의 급박한 생명, 신체, 재산상 이익을 위해 필요한 경우입니다.",
+  },
+  {
+    value: "legitimate_interest",
+    label: "정당한 이익",
+    description: "개인정보처리자의 정당한 이익 달성을 위해 필요한 경우입니다.",
+  },
+];
+
 const yesNoOptions: FieldOption[] = [
   { value: "true", label: "예" },
   { value: "false", label: "아니오" },
@@ -134,6 +186,24 @@ const dataSubjectConnectionOptions: FieldOption[] = [
     value: "OTHER",
     label: "사우디 연결성 불명확",
     description: "사우디 거주자 여부나 수집 위치가 아직 확정되지 않은 경우입니다.",
+  },
+];
+
+const lgpdDataSubjectConnectionOptions: FieldOption[] = [
+  {
+    value: "BRAZIL_RESIDENT",
+    label: "브라질 거주자 데이터",
+    description: "브라질 거주 고객, 직원, 이용자 등의 개인정보입니다.",
+  },
+  {
+    value: "COLLECTED_IN_BRAZIL",
+    label: "브라질 내 수집 데이터",
+    description: "브라질 앱, 웹사이트, 지점, 캠페인 등에서 수집된 개인정보입니다.",
+  },
+  {
+    value: "OTHER",
+    label: "기타 또는 불명확",
+    description: "브라질과의 연결성이 아직 명확하지 않은 경우입니다.",
   },
 ];
 
@@ -436,6 +506,281 @@ const saudiSteps = [
   }
 ] as const;
 
+// 🇹🇼 대만 기본 상태 및 단계
+const taiwanDefaultState: GuidedFormState = {
+  dataset_name: "", current_region: "", target_region: "", encryption_at_rest: "unknown",
+  agency_type: "", specific_purpose_defined: "unknown", collection_processing_basis: "",
+  collected_directly_from_data_subject: "unknown", article8_notice_provided: "unknown",
+  data_subject_rights_request_ready: "unknown", security_maintenance_measures_ready: "unknown",
+  cross_border_transfer: "unknown", authority_transfer_restriction_applies: "unknown",
+};
+
+const taiwanSteps = [
+  {
+    id: "taiwan_context",
+    title: "대만 PDPA 검토 기본 정보",
+    description: "대만 거주자 데이터 처리 및 국외 이전 관련 기본 사항을 입력합니다.",
+    fields: [
+      { key: "dataset_name", label: "데이터셋 명칭", helper: "검토할 데이터셋을 선택하세요.", kind: "select", options: emptyFirst(datasetOptions, "선택"), required: true },
+      { key: "agency_type", label: "기관 유형", helper: "공공기관인지 비공공기관인지 선택하세요.", kind: "select", options: emptyFirst(taiwanAgencyOptions, "선택"), required: true },
+      { key: "current_region", label: "현재 리전", helper: "현재 데이터가 저장 또는 처리되는 위치를 선택하세요.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+      { key: "target_region", label: "대상 리전", helper: "이전 또는 복제 대상 위치를 선택하세요.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+    ],
+  },
+  {
+    id: "taiwan_lawfulness",
+    title: "처리 적법성 및 보안",
+    description: "데이터 수집 목적과 보안 조치 여부를 확인합니다.",
+    fields: [
+      { key: "collection_processing_basis", label: "수집/처리 법적 근거", helper: "계약, 동의, 법적 의무 중 가장 가까운 근거를 선택하세요.", kind: "select", options: emptyFirst(taiwanBasisOptions, "선택"), required: true },
+      { key: "specific_purpose_defined", label: "특정 목적 정의 여부", helper: "개인정보 수집·처리 목적이 구체적으로 정해져 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "security_maintenance_measures_ready", label: "보안 유지 조치 마련", helper: "개인정보 도난, 유출, 훼손을 막기 위한 보안조치가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "cross_border_transfer", label: "대만 국외로 데이터 이전", helper: "대만 밖에서 개인정보를 처리 또는 이용하는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "authority_transfer_restriction_applies", label: "주무기관의 국외 이전 제한 대상 여부", helper: "수령국 보호수준 부족, 중대 국가이익 등 제한 사유가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.cross_border_transfer === "true" },
+    ],
+  },
+] as const;
+
+// 🇧🇷 브라질 기본 상태 및 단계
+const lgpdDefaultState: GuidedFormState = {
+  dataset_name: "",
+  data_subject_connection: "",
+  current_region: "",
+  target_region: "",
+
+  processing_purpose_defined: "unknown",
+  data_minimized: "unknown",
+  retention_period_defined: "unknown",
+  processing_legal_basis: "",
+  contains_sensitive_data: "unknown",
+
+  international_transfer: "unknown",
+  adequacy_decision_confirmed: "unknown",
+  standard_contractual_clauses_full_unaltered: "unknown",
+  binding_corporate_rules_anpd_approved: "unknown",
+  specific_contractual_clauses_anpd_approved: "unknown",
+  transfer_exception_used: "unknown",
+
+  data_subject_rights_ready: "unknown",
+  transparency_information_published: "unknown",
+  security_measures_ready: "unknown",
+
+  controller_identified: "unknown",
+  processor_used: "unknown",
+  processor_contract_in_place: "unknown",
+
+  encryption_at_rest: "unknown",
+  encryption_in_transit: "unknown",
+  access_control_in_place: "unknown",
+};
+
+const pipaDefaultState: GuidedFormState = {
+  dataset_name: "",
+  current_region: "",
+  target_region: "",
+
+  lawful_basis: "",
+  processing_purpose_defined: "unknown",
+  data_minimized: "unknown",
+  retention_period_defined: "unknown",
+
+  privacy_policy_available: "unknown",
+  privacy_notice_available: "unknown",
+  data_subject_rights_process_ready: "unknown",
+
+  contains_sensitive_data: "unknown",
+  has_unique_identifier: "unknown",
+  uses_resident_registration_number: "unknown",
+  sensitive_data_basis: "",
+  unique_identifier_basis: "",
+  resident_registration_statutory_basis: "unknown",
+
+  uses_processor: "unknown",
+  dpa_in_place: "unknown",
+  processor_public_disclosure: "unknown",
+  processor_supervision_done: "unknown",
+  subprocessor_controls_in_place: "unknown",
+
+  separate_consent_for_transfer: "unknown",
+  treaty_or_statutory_transfer_basis: "unknown",
+  contract_necessity_disclosed_or_notified: "unknown",
+  pipa_certified_recipient: "unknown",
+  adequacy_decision_exists: "unknown",
+  cross_border_notice_provided: "unknown",
+  transfer_protection_measures_ready: "unknown",
+  onward_transfer_controls: "unknown",
+
+  encryption_at_rest: "unknown",
+  encryption_in_transit: "unknown",
+  access_control_in_place: "unknown",
+
+  is_automated_decision_only: "unknown",
+  automated_decision_significant_effect: "unknown",
+  automated_decision_rights_ready: "unknown",
+  provides_explanation: "unknown",
+  human_review_available: "unknown",
+
+  privacy_officer_assigned: "unknown",
+  breach_response_ready: "unknown",
+};
+
+const lgpdSteps = [
+  {
+    id: "lgpd_context",
+    title: "브라질 LGPD 검토",
+    description: "브라질 정보주체 데이터 처리 및 국외 이전 사항을 입력합니다.",
+    fields: [
+      { key: "dataset_name", label: "데이터셋 명칭", helper: "검토할 데이터셋을 선택하세요.", kind: "select", options: emptyFirst(datasetOptions, "선택"), required: true },
+      { key: "data_subject_connection", label: "브라질 연결성", helper: "브라질 거주자 또는 브라질 내 수집 데이터인지 선택하세요.", kind: "select", options: emptyFirst(lgpdDataSubjectConnectionOptions, "선택"), required: true },
+      { key: "current_region", label: "현재 리전", helper: "현재 데이터가 저장 또는 처리되는 위치를 선택하세요.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+      { key: "target_region", label: "대상 리전", helper: "이전 또는 복제 대상 위치를 선택하세요.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+      { key: "processing_legal_basis", label: "제7조 데이터 처리 법적 근거", helper: "동의, 계약 이행, 정당한 이익 중 가장 가까운 근거를 선택하세요.", kind: "select", options: emptyFirst(lgpdBasisOptions, "선택"), required: true },
+    ],
+  },
+  {
+    id: "lgpd_governance",
+    title: "처리 원칙과 기본 준비",
+    description: "처리 목적, 최소화, 보관기간, 권리 대응 준비 상태를 확인합니다.",
+    fields: [
+      { key: "processing_purpose_defined", label: "처리 목적이 정의되어 있나요?", helper: "주문 처리, 고객지원, 분석 등 처리 목적을 설명할 수 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "data_minimized", label: "필요 최소한의 데이터만 처리하나요?", helper: "목적에 필요한 최소 항목만 처리하는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "retention_period_defined", label: "보관기간 또는 삭제 기준이 있나요?", helper: "보관기간, 삭제 시점, 파기 기준이 정해져 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "contains_sensitive_data", label: "민감정보가 포함되어 있나요?", helper: "건강, 생체, 아동, 금융 등 추가 보호가 필요한 정보가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "data_subject_rights_ready", label: "정보주체 권리 대응 절차가 있나요?", helper: "열람, 정정, 삭제 등 정보주체 요청에 대응할 수 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "transparency_information_published", label: "투명성/고지 정보가 공개되어 있나요?", helper: "개인정보 처리 및 국제이전 관련 고지 정보가 제공되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "security_measures_ready", label: "보안조치가 준비되어 있나요?", helper: "처리 위험에 맞는 기술적·관리적 보안조치가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+    ],
+  },
+  {
+    id: "lgpd_transfer",
+    title: "국외 이전 보호조치",
+    description: "브라질 영토 밖으로 데이터를 이전할 때 필요한 보호 조치를 확인합니다.",
+    fields: [
+      { key: "international_transfer", label: "브라질 밖으로 이전합니까?", helper: "브라질 외 국가 또는 국제기구로 개인정보가 이전되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "adequacy_decision_confirmed", label: "ANPD 인정 적정성 결정 국가입니까?", helper: "대상 국가가 ANPD의 적정성 인정을 받았는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.international_transfer === "true" },
+      { key: "standard_contractual_clauses_full_unaltered", label: "브라질 SCC 원문 전체·무변경 채택 완료", helper: "ANPD 승인 표준계약조항을 변경 없이 채택했는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.international_transfer === "true" },
+      { key: "binding_corporate_rules_anpd_approved", label: "ANPD 승인 BCR 보유", helper: "기업집단 내부 이전에 대해 ANPD 승인 BCR이 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.international_transfer === "true" },
+      { key: "specific_contractual_clauses_anpd_approved", label: "ANPD 승인 특정계약조항 보유", helper: "특정 이전에 대해 ANPD 승인 계약조항이 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.international_transfer === "true" },
+      { key: "transfer_exception_used", label: "예외 이전 경로를 사용하나요?", helper: "계약조항이나 적정성 대신 예외 경로를 사용하는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.international_transfer === "true" },
+    ],
+  },
+  {
+    id: "lgpd_processor",
+    title: "컨트롤러와 처리자",
+    description: "처리 주체와 처리자 계약 여부를 확인합니다.",
+    fields: [
+      { key: "controller_identified", label: "컨트롤러가 식별되어 있나요?", helper: "처리 목적과 수단을 결정하는 주체가 누구인지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "processor_used", label: "처리자를 사용하나요?", helper: "외부 업체, 클라우드, SaaS 등 처리자가 관여하는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "processor_contract_in_place", label: "처리자 계약이 있나요?", helper: "처리자를 사용하는 경우 계약 또는 서면 조건이 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.processor_used === "true" },
+      { key: "encryption_at_rest", label: "저장 시 암호화가 적용되어 있나요?", helper: "저장된 데이터에 암호화가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "encryption_in_transit", label: "전송 시 암호화가 적용되어 있나요?", helper: "TLS 등 전송 구간 암호화가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "access_control_in_place", label: "접근통제가 적용되어 있나요?", helper: "권한 관리, 접근 제한, 인증 통제가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+    ],
+  },
+] as const;
+
+const pipaSteps = [
+  {
+    id: "pipa_context",
+    title: "한국 PIPA 검토 기본 정보",
+    description: "한국 개인정보 처리와 국외이전 여부를 판단하기 위한 기본 정보를 입력합니다.",
+    fields: [
+      { key: "dataset_name", label: "데이터셋 명칭", helper: "검토할 데이터셋을 선택하세요.", kind: "select", options: emptyFirst(datasetOptions, "선택"), required: true },
+      { key: "current_region", label: "현재 리전", helper: "현재 데이터가 저장 또는 처리되는 위치입니다.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+      { key: "target_region", label: "대상 리전", helper: "이전 또는 복제 대상 위치입니다.", kind: "select", options: emptyFirst(targetRegionOptions, "선택"), required: true },
+      { key: "lawful_basis", label: "수집·이용 적법근거", helper: "동의, 계약 이행, 법령상 근거 등 가장 가까운 근거를 선택하세요.", kind: "select", options: emptyFirst(pipaLawfulBasisOptions, "선택"), required: true },
+    ],
+  },
+  {
+    id: "pipa_basic",
+    title: "처리 원칙과 고지",
+    description: "목적, 최소수집, 보관기간, 처리방침과 권리 대응 준비 상태를 확인합니다.",
+    fields: [
+      { key: "processing_purpose_defined", label: "처리 목적이 정의되어 있나요?", helper: "개인정보 처리 목적이 구체적으로 정해져 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "data_minimized", label: "필요 최소한의 정보만 처리하나요?", helper: "목적에 필요한 최소 항목만 처리하는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "retention_period_defined", label: "보유기간·파기 기준이 있나요?", helper: "보유기간과 파기 기준이 정해져 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "privacy_policy_available", label: "개인정보 처리방침이 공개되어 있나요?", helper: "처리방침 또는 고지 문서가 준비되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "privacy_notice_available", label: "수집·이용 고지가 제공되나요?", helper: "정보주체에게 필요한 고지 사항이 제공되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "data_subject_rights_process_ready", label: "정보주체 권리 대응 절차가 있나요?", helper: "열람, 정정, 삭제, 처리정지, 동의철회 대응 절차를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+    ],
+  },
+  {
+    id: "pipa_sensitive",
+    title: "민감정보와 고유식별정보",
+    description: "민감정보, 고유식별정보, 주민등록번호 처리 여부와 근거를 확인합니다.",
+    fields: [
+      { key: "contains_sensitive_data", label: "민감정보가 포함되어 있나요?", helper: "건강, 사상·신념, 범죄경력 등 민감정보 포함 여부를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      {
+        key: "sensitive_data_basis",
+        label: "민감정보 처리 근거",
+        helper: "민감정보가 있다면 명시적 동의 또는 법령상 근거를 선택하세요.",
+        kind: "select",
+        options: emptyFirst(
+          [
+            { value: "explicit_consent", label: "명시적 동의" },
+            { value: "statutory_basis", label: "법령상 근거" },
+            { value: "none", label: "근거 없음" },
+            { value: "unknown", label: "잘 모르겠음" },
+          ],
+          "선택",
+        ),
+        visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true",
+      },
+      { key: "has_unique_identifier", label: "고유식별정보가 포함되어 있나요?", helper: "여권번호, 운전면허번호, 외국인등록번호 등 포함 여부를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      {
+        key: "unique_identifier_basis",
+        label: "고유식별정보 처리 근거",
+        helper: "고유식별정보가 있다면 별도 동의 또는 법령상 근거를 선택하세요.",
+        kind: "select",
+        options: emptyFirst(
+          [
+            { value: "separate_consent", label: "별도 동의" },
+            { value: "statutory_basis", label: "법령상 근거" },
+            { value: "none", label: "근거 없음" },
+            { value: "unknown", label: "잘 모르겠음" },
+          ],
+          "선택",
+        ),
+        visibleIf: (state: GuidedFormState) => state.has_unique_identifier === "true",
+      },
+      { key: "uses_resident_registration_number", label: "주민등록번호를 처리하나요?", helper: "주민등록번호 처리 여부를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "resident_registration_statutory_basis", label: "주민등록번호 법령 근거가 있나요?", helper: "주민등록번호 처리가 법령에 의해 허용 또는 요구되는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.uses_resident_registration_number === "true" },
+    ],
+  },
+  {
+    id: "pipa_transfer",
+    title: "국외이전과 보호조치",
+    description: "한국 밖으로 이전하는 경우 제28조의8상 허용 경로와 보호조치를 확인합니다.",
+    fields: [
+      { key: "separate_consent_for_transfer", label: "국외이전 별도 동의를 받았나요?", helper: "국외이전 별도 동의 경로를 사용하는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "contract_necessity_disclosed_or_notified", label: "계약 이행상 위탁·보관 필요 및 공개/통지", helper: "계약 이행상 필요한 위탁·보관이고 처리방침 공개 또는 통지가 되었는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "treaty_or_statutory_transfer_basis", label: "법률·조약·국제협정 근거", helper: "법률, 조약, 국제협정상 국외이전 근거가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "pipa_certified_recipient", label: "인증받은 수령자", helper: "보호위원회 지정 인증 등을 받은 수령자인지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "adequacy_decision_exists", label: "동등 보호수준 인정", helper: "보호위원회가 동등한 보호수준을 인정한 국가 또는 기관인지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "cross_border_notice_provided", label: "국외이전 고지 항목 제공", helper: "이전 항목, 국가, 시기, 방법, 수령자, 목적, 보유기간, 거부 방법 등을 고지했는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "transfer_protection_measures_ready", label: "국외이전 보호조치 준비", helper: "국외 수령자의 보호조치와 권리보장 절차가 준비되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+      { key: "onward_transfer_controls", label: "제3국 재이전 통제", helper: "국외 수령자가 다시 제3국으로 이전하는 경우를 통제하는지 확인합니다.", kind: "segmented", options: yesNoOptions },
+    ],
+  },
+  {
+    id: "pipa_processor_security",
+    title: "위탁, 보안, 거버넌스",
+    description: "수탁자 관리, 안전조치, 보호책임자, 사고 대응 준비 상태를 확인합니다.",
+    fields: [
+      { key: "uses_processor", label: "수탁자 또는 외부 처리자를 사용하나요?", helper: "클라우드, SaaS, 외주사 등 처리위탁이 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "dpa_in_place", label: "위탁계약 또는 문서가 있나요?", helper: "위탁업무 범위와 보호조치가 포함된 문서가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "processor_public_disclosure", label: "수탁자 공개가 되어 있나요?", helper: "위탁업무와 수탁자 정보를 처리방침 등으로 공개했는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "processor_supervision_done", label: "수탁자 교육·감독을 했나요?", helper: "수탁자 점검, 교육, 감독 이력이 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "subprocessor_controls_in_place", label: "재위탁 통제가 있나요?", helper: "재위탁 승인, 제한 조항, 하위 수탁자 통제가 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.uses_processor === "true" },
+      { key: "encryption_at_rest", label: "저장 시 암호화가 적용되어 있나요?", helper: "저장 데이터 암호화 여부를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "encryption_in_transit", label: "전송 시 암호화가 적용되어 있나요?", helper: "전송 구간 암호화 여부를 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "access_control_in_place", label: "접근통제가 적용되어 있나요?", helper: "권한 관리와 접근 제한이 적용되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "privacy_officer_assigned", label: "개인정보 보호책임자가 지정되어 있나요?", helper: "보호책임자 또는 담당 부서가 지정되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+      { key: "breach_response_ready", label: "침해 대응 절차가 있나요?", helper: "유출 등 사고 발생 시 대응 절차가 준비되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
+    ],
+  },
+] as const;
+
 export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
   gdpr: {
     id: "gdpr",
@@ -640,5 +985,282 @@ export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {
       { label: "위치 흐름", value: state.current_region && state.target_region ? `${state.current_region} -> ${state.target_region}` : "미선택" },
       { label: "처리 근거", value: getOptionLabel(saudiLegalBasisOptions, state.processing_legal_basis) }
     ]
+  },
+
+  taiwan: {
+    id: "taiwan",
+    label: "Taiwan PDPA",
+    subtitle: "대만 PDPA 국제전송 평가",
+    storageKey: "border-checker-guided-taiwan-v1",
+    steps: taiwanSteps as unknown as PackUiDefinition["steps"],
+    defaultState: taiwanDefaultState,
+    validate: (state) => {
+      return taiwanSteps.flatMap((step) =>
+        missingVisibleRequired(step.fields, state),
+      );
+    },
+    buildPayload: (state) => {
+      return {
+        aws_data: {
+          current_region: state.current_region,
+          target_region: state.target_region,
+          encryption_at_rest: toNullableBoolean(state.encryption_at_rest),
+        },
+        policy_data: {
+          dataset_name: state.dataset_name,
+          agency_type: state.agency_type,
+          specific_purpose_defined: toNullableBoolean(state.specific_purpose_defined),
+          collection_processing_basis: state.collection_processing_basis,
+          collected_directly_from_data_subject: true,
+          article8_notice_provided: true,
+          data_subject_rights_request_ready: true,
+          retention_period_defined: true,
+          security_maintenance_measures_ready: toNullableBoolean(state.security_maintenance_measures_ready),
+          cross_border_transfer: toNullableBoolean(state.cross_border_transfer),
+          authority_transfer_restriction_applies:
+            state.cross_border_transfer === "true"
+              ? toNullableBoolean(state.authority_transfer_restriction_applies)
+              : false,
+        },
+      };
+    },
+    buildAdvisoryNotes: (state) => {
+      const notes: string[] = [];
+      if (state.cross_border_transfer === "true") {
+        notes.push("대만 국외전송 시 주무기관 제한 사유 적용 여부를 우선 확인합니다.");
+      }
+      if (state.authority_transfer_restriction_applies === "true") {
+        notes.push("주무기관 제한 사유가 적용되면 자동 허용보다 거부 또는 법무 검토가 우선됩니다.");
+      }
+      return notes.length > 0 ? notes : ["대만 PDPA 기준의 기본 수집·처리·국외전송 검토입니다."];
+    },
+    buildSummaryRows: (state) => [
+      { label: "데이터셋", value: getOptionLabel(datasetOptions, state.dataset_name) },
+      { label: "기관 유형", value: getOptionLabel(taiwanAgencyOptions, state.agency_type) },
+      { label: "리전 흐름", value: state.current_region && state.target_region ? `${state.current_region} -> ${state.target_region}` : "미선택" },
+      { label: "국외전송", value: state.cross_border_transfer === "true" ? "예" : state.cross_border_transfer === "false" ? "아니오" : "미확인" },
+    ],
+  },
+
+  lgpd: {
+    id: "lgpd",
+    label: "Brazil LGPD",
+    subtitle: "브라질 LGPD 국제이전 평가",
+    storageKey: "border-checker-guided-lgpd-v1",
+    steps: lgpdSteps as unknown as PackUiDefinition["steps"],
+    defaultState: lgpdDefaultState,
+    validate: (state) => {
+      return lgpdSteps.flatMap((step) =>
+        missingVisibleRequired(step.fields, state),
+      );
+    },
+    buildPayload: (state) => {
+      const internationalTransfer = toNullableBoolean(state.international_transfer) ?? false;
+      const processorUsed = toNullableBoolean(state.processor_used) ?? false;
+
+      return {
+        aws_data: {
+          current_region: state.current_region,
+          target_region: state.target_region,
+          encryption_at_rest: toNullableBoolean(state.encryption_at_rest),
+          encryption_in_transit: toNullableBoolean(state.encryption_in_transit),
+          access_control_in_place: toNullableBoolean(state.access_control_in_place),
+        },
+        policy_data: {
+          dataset_name: state.dataset_name,
+          data_subject_connection: state.data_subject_connection,
+          processing_purpose_defined: toNullableBoolean(state.processing_purpose_defined),
+          data_minimized: toNullableBoolean(state.data_minimized),
+          retention_period_defined: toNullableBoolean(state.retention_period_defined),
+          processing_legal_basis: state.processing_legal_basis || null,
+          contains_sensitive_data: toNullableBoolean(state.contains_sensitive_data),
+
+          international_transfer: internationalTransfer,
+          adequacy_decision_confirmed: internationalTransfer
+            ? toNullableBoolean(state.adequacy_decision_confirmed)
+            : false,
+          standard_contractual_clauses_full_unaltered: internationalTransfer
+            ? toNullableBoolean(state.standard_contractual_clauses_full_unaltered)
+            : false,
+          binding_corporate_rules_anpd_approved: internationalTransfer
+            ? toNullableBoolean(state.binding_corporate_rules_anpd_approved)
+            : false,
+          specific_contractual_clauses_anpd_approved: internationalTransfer
+            ? toNullableBoolean(state.specific_contractual_clauses_anpd_approved)
+            : false,
+          transfer_exception_used: internationalTransfer
+            ? toNullableBoolean(state.transfer_exception_used)
+            : false,
+
+          data_subject_rights_ready: toNullableBoolean(state.data_subject_rights_ready),
+          transparency_information_published: toNullableBoolean(state.transparency_information_published),
+          security_measures_ready: toNullableBoolean(state.security_measures_ready),
+
+          controller_identified: toNullableBoolean(state.controller_identified),
+          processor_used: processorUsed,
+          processor_contract_in_place: processorUsed
+            ? toNullableBoolean(state.processor_contract_in_place)
+            : false,
+        },
+      };
+    },
+    buildAdvisoryNotes: (state) => {
+      const notes: string[] = [];
+      if (state.international_transfer === "true") {
+        notes.push("LGPD 국제이전은 적정성, SCC, BCR, 특정계약조항, 예외 경로 중 하나가 필요합니다.");
+      }
+      if (state.standard_contractual_clauses_full_unaltered === "true") {
+        notes.push("브라질 SCC는 ANPD 승인 문구의 전체·무변경 채택 여부를 확인해야 합니다.");
+      }
+      if (state.processor_used === "true") {
+        notes.push("처리자를 사용하는 경우 처리자 계약과 역할 분담을 함께 확인합니다.");
+      }
+      return notes.length > 0 ? notes : ["브라질 LGPD 기준의 기본 처리·국제이전 검토입니다."];
+    },
+    buildSummaryRows: (state) => [
+      { label: "데이터셋", value: getOptionLabel(datasetOptions, state.dataset_name) },
+      { label: "브라질 연결성", value: getOptionLabel(lgpdDataSubjectConnectionOptions, state.data_subject_connection) },
+      { label: "리전 흐름", value: state.current_region && state.target_region ? `${state.current_region} -> ${state.target_region}` : "미선택" },
+      { label: "처리 근거", value: getOptionLabel(lgpdBasisOptions, state.processing_legal_basis) },
+    ],
+  },
+  korea_pipa: {
+    id: "korea_pipa",
+    label: "Korea PIPA",
+    subtitle: "한국 개인정보보호법 국외이전 평가",
+    storageKey: "border-checker-guided-korea-pipa-v1",
+    steps: pipaSteps as unknown as PackUiDefinition["steps"],
+    defaultState: pipaDefaultState,
+    validate: (state) => {
+      return pipaSteps.flatMap((step) =>
+        missingVisibleRequired(step.fields, state),
+      );
+    },
+    buildPayload: (state) => {
+      const usesProcessor = toNullableBoolean(state.uses_processor) ?? false;
+
+      return {
+        aws_data: {
+          current_region: state.current_region,
+          encryption_at_rest: toNullableBoolean(state.encryption_at_rest),
+          encryption_in_transit: toNullableBoolean(state.encryption_in_transit),
+          access_control_in_place: toNullableBoolean(state.access_control_in_place),
+
+          data_type: state.data_type || "customer_profiles",
+          contains_sensitive_data: toNullableBoolean(state.contains_sensitive_data),
+          has_unique_identifier: toNullableBoolean(state.has_unique_identifier),
+          uses_resident_registration_number: toNullableBoolean(state.uses_resident_registration_number),
+          uses_processor: usesProcessor,
+          is_automated_decision_only: false,
+        },
+        policy_data: {
+          dataset_name: state.dataset_name,
+          target_region: state.target_region,
+
+          lawful_basis: state.lawful_basis || null,
+          processing_purpose_defined: toNullableBoolean(state.processing_purpose_defined),
+          data_minimized: toNullableBoolean(state.data_minimized),
+          retention_period_defined: toNullableBoolean(state.retention_period_defined),
+
+          privacy_notice_available: toNullableBoolean(state.privacy_notice_available),
+          privacy_policy_available: toNullableBoolean(state.privacy_policy_available),
+          consent_notice_clear: true,
+          consent_withdrawal_process_ready: true,
+
+          third_party_sharing: false,
+          third_party_provision_consent_or_basis: true,
+
+          sensitive_data_basis:
+            state.contains_sensitive_data === "true"
+              ? state.sensitive_data_basis || "unknown"
+              : null,
+          unique_identifier_basis:
+            state.has_unique_identifier === "true"
+              ? state.unique_identifier_basis || "unknown"
+              : null,
+          resident_registration_statutory_basis:
+            state.uses_resident_registration_number === "true"
+              ? toNullableBoolean(state.resident_registration_statutory_basis)
+              : false,
+
+          dpa_in_place: usesProcessor ? toNullableBoolean(state.dpa_in_place) : true,
+          processor_public_disclosure: usesProcessor ? toNullableBoolean(state.processor_public_disclosure) : true,
+          processor_supervision_done: usesProcessor ? toNullableBoolean(state.processor_supervision_done) : true,
+          subprocessor_controls_in_place: usesProcessor ? toNullableBoolean(state.subprocessor_controls_in_place) : true,
+
+          separate_consent_for_transfer: toNullableBoolean(state.separate_consent_for_transfer),
+          treaty_or_statutory_transfer_basis: toNullableBoolean(state.treaty_or_statutory_transfer_basis),
+          contract_necessity_disclosed_or_notified: toNullableBoolean(state.contract_necessity_disclosed_or_notified),
+          pipa_certified_recipient: toNullableBoolean(state.pipa_certified_recipient),
+          adequacy_decision_exists: toNullableBoolean(state.adequacy_decision_exists),
+          cross_border_notice_provided: toNullableBoolean(state.cross_border_notice_provided),
+          transfer_protection_measures_ready: toNullableBoolean(state.transfer_protection_measures_ready),
+          onward_transfer_controls: toNullableBoolean(state.onward_transfer_controls),
+
+          data_subject_rights_process_ready: toNullableBoolean(state.data_subject_rights_process_ready),
+
+          automated_decision_significant_effect: false,
+          automated_decision_rights_ready: true,
+          provides_explanation: true,
+          human_review_available: true,
+
+          privacy_officer_assigned: toNullableBoolean(state.privacy_officer_assigned),
+          breach_response_ready: toNullableBoolean(state.breach_response_ready),
+        },
+      };
+    },
+    buildAdvisoryNotes: (state) => {
+      const notes: string[] = [];
+
+      if (state.target_region && state.target_region !== "ap-northeast-2") {
+        notes.push("대상 리전이 한국 밖이면 제28조의8 국외이전 경로와 고지, 보호조치를 확인해야 합니다.");
+      }
+
+      if (state.contains_sensitive_data === "true") {
+        notes.push("민감정보가 포함되면 명시적 동의 또는 법령상 근거가 필요합니다.");
+      }
+
+      if (state.has_unique_identifier === "true") {
+        notes.push("고유식별정보가 포함되면 별도 동의 또는 법령상 근거와 암호화 등 보호조치를 확인해야 합니다.");
+      }
+
+      if (state.uses_resident_registration_number === "true") {
+        notes.push("주민등록번호는 일반 동의만으로 부족하며 구체적인 법령 근거가 필요합니다.");
+      }
+
+      if (state.uses_processor === "true") {
+        notes.push("처리위탁이 있으면 위탁문서, 수탁자 공개, 교육·감독 여부를 함께 확인합니다.");
+      }
+
+      return notes.length > 0
+        ? notes
+        : ["한국 PIPA 기준의 기본 개인정보 처리 및 국외이전 검토입니다."];
+    },
+    buildSummaryRows: (state) => [
+      {
+        label: "데이터셋",
+        value: getOptionLabel(datasetOptions, state.dataset_name),
+      },
+      {
+        label: "리전 흐름",
+        value:
+          state.current_region && state.target_region
+            ? `${state.current_region} -> ${state.target_region}`
+            : "미선택",
+      },
+      {
+        label: "처리 근거",
+        value: getOptionLabel(pipaLawfulBasisOptions, state.lawful_basis),
+      },
+      {
+        label: "민감정보",
+        value:
+          state.contains_sensitive_data === "true"
+            ? "포함"
+            : state.contains_sensitive_data === "false"
+              ? "미포함"
+              : "미확인",
+      },
+    ],
   }
 };

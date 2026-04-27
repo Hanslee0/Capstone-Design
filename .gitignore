@@ -18,4 +18,5 @@ dist/
 Thumbs.db
 
 # Logs
-*.log
+*.logbackend/venv/
+venv/

@@ -22,6 +22,21 @@ PACK_REGISTRY = {
         "default_pack_file": "saudi_pdpl_pack_v1.json",
         "default_schema_file": "input_schema_v1.json",
     },
+    "lgpd": {
+        "directory": "lgpd",
+        "default_pack_file": "lgpd_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
+    "taiwan": {
+        "directory": "taiwan_pdpa",
+        "default_pack_file": "taiwan_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
+    "korea_pipa": {
+        "directory": "korea_pipa",
+        "default_pack_file": "pipa_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
 }
 
 
