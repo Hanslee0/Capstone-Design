@@ -121,6 +121,30 @@ export type EvaluationResult = {
   merged_input: JsonObject;
 };
 
+export type PackEvaluationItem = {
+  pack_id: string;
+  country: string;
+  role: string;
+  reason: string;
+  final_decision?: DecisionGrade | null;
+  result?: EvaluationResult | null;
+  error?: string | null;
+};
+
+export type MultiEvaluationResult = {
+  origin_country: string;
+  destination_country: string;
+  primary_pack_id: string;
+  reference_pack_ids: string[];
+  overall_decision: DecisionGrade;
+  overall_summary: string;
+  overall_warnings: string[];
+  primary_result: PackEvaluationItem;
+  reference_results: PackEvaluationItem[];
+  results_by_pack: PackEvaluationItem[];
+  merged_cloud_input: JsonObject;
+};
+
 export const decisionMeta: Record<
   DecisionGrade,
   { label: string; className: string; description: string }

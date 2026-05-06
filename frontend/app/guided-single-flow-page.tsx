@@ -12,6 +12,8 @@ import { ExplainabilityPanel, ResultPanel } from "./workspace-output-panels";
 import { buildErrorMessage, fetchJson } from "./workspace-runtime";
 import type {
   EvaluationResult,
+  JsonObject,
+  MultiEvaluationResult,
   PackDetail,
   PackSummary,
 } from "./workspace-types";
@@ -28,6 +30,49 @@ import {
 } from "./workspace-ui";
 
 const SELECTED_PACK_STORAGE_KEY = "border-checker-selected-pack";
+
+const COUNTRY_OPTIONS = [
+  { value: "EU", label: "EU / EEA" },
+  { value: "Korea", label: "Korea" },
+  { value: "Brazil", label: "Brazil" },
+  { value: "Taiwan", label: "Taiwan" },
+  { value: "Saudi Arabia", label: "Saudi Arabia" },
+];
+
+const CLOUD_PROVIDER_OPTIONS = [
+  { value: "manual", label: "수동 입력" },
+  { value: "aws", label: "AWS Mock" },
+  { value: "azure", label: "Azure Mock" },
+];
+
+const COUNTRY_TO_EXPORT_PACK: Record<string, string> = {
+  EU: "gdpr",
+  Korea: "korea_pipa",
+  Brazil: "lgpd",
+  "Saudi Arabia": "saudi_pdpl",
+  Taiwan: "taiwan",
+};
+
+const COUNTRY_TO_DESTINATION_PACK: Record<string, string> = {
+  EU: "gdpr_destination",
+  Korea: "korea_pipa_destination",
+  Brazil: "lgpd_destination",
+  "Saudi Arabia": "saudi_pdpl_destination",
+  Taiwan: "taiwan_destination",
+};
+
+const PACK_LABELS: Record<string, string> = {
+  gdpr: "GDPR",
+  korea_pipa: "Korea PIPA",
+  lgpd: "Brazil LGPD",
+  saudi_pdpl: "Saudi PDPL",
+  taiwan: "Taiwan PDPA",
+  gdpr_destination: "GDPR Destination Compliance",
+  korea_pipa_destination: "Korea PIPA Destination Compliance",
+  lgpd_destination: "Brazil LGPD Destination Compliance",
+  saudi_pdpl_destination: "Saudi PDPL Destination Compliance",
+  taiwan_destination: "Taiwan PDPA Destination Compliance",
+};
 
 type ScreenMode = "intro" | "step" | "review" | "result";
 
@@ -137,7 +182,12 @@ export function GuidedSingleFlowPage() {
   const [screenMode, setScreenMode] = useState<ScreenMode>("intro");
   const [stepIndex, setStepIndex] = useState(0);
   const [evaluationResult, setEvaluationResult] =
-    useState<EvaluationResult | null>(null);
+  useState<EvaluationResult | null>(null);
+  const [multiEvaluationResult, setMultiEvaluationResult] =
+  useState<MultiEvaluationResult | null>(null);
+  const [originCountry, setOriginCountry] = useState("EU");
+  const [destinationCountry, setDestinationCountry] = useState("Brazil");
+  const [cloudProvider, setCloudProvider] = useState("aws");
   const [statusMessage, setStatusMessage] = useState(
     "법제를 고르고 단계별 질문에 답하면 마지막 검토 화면에서 평가를 실행합니다.",
   );
@@ -148,6 +198,11 @@ export function GuidedSingleFlowPage() {
 
   const packDefinition =
     PACK_UI_DEFINITIONS[selectedPackId] ?? PACK_UI_DEFINITIONS.gdpr;
+  const autoPrimaryPackId =
+  COUNTRY_TO_EXPORT_PACK[originCountry] ?? selectedPackId;
+
+  const autoReferencePackId =
+  COUNTRY_TO_DESTINATION_PACK[destinationCountry];
   const currentStep = packDefinition.steps[stepIndex];
   const visibleFields = collectVisibleStepFields(
     packDefinition,
@@ -227,6 +282,7 @@ export function GuidedSingleFlowPage() {
       setStepIndex(0);
       setScreenMode("intro");
       setEvaluationResult(null);
+      setMultiEvaluationResult(null);
       setStorageReady(true);
       setStatusMessage(
         `${definition.label} 질문 흐름을 불러왔습니다. 시작하기를 누르면 한 단계씩 진행됩니다.`,
@@ -294,6 +350,16 @@ export function GuidedSingleFlowPage() {
     });
   }
 
+  function updateOriginCountry(value: string) {
+  setOriginCountry(value);
+  setErrorMessage(null);
+
+  const nextPackId = COUNTRY_TO_EXPORT_PACK[value];
+  if (nextPackId && nextPackId !== selectedPackId && nextPackId in PACK_UI_DEFINITIONS) {
+    setSelectedPackId(nextPackId);
+  }
+}
+
   function resetCurrentPack() {
     window.localStorage.removeItem(packDefinition.storageKey);
     startTransition(() => {
@@ -301,35 +367,112 @@ export function GuidedSingleFlowPage() {
       setStepIndex(0);
       setScreenMode("intro");
       setEvaluationResult(null);
+      setMultiEvaluationResult(null);
       setErrorMessage(null);
       setStatusMessage("입력을 초기화했습니다. 다시 시작해 주세요.");
     });
   }
 
   async function runEvaluation() {
-    setIsBusy(true);
-    setErrorMessage(null);
+  setIsBusy(true);
+  setErrorMessage(null);
 
-    try {
-      const response = await fetchJson<EvaluationResult>("/api/v1/evaluate", {
+  try {
+    const basePayload = packDefinition.buildPayload(formState) as {
+      aws_data: JsonObject;
+      policy_data: JsonObject;
+    };
+
+    const awsData: JsonObject = {
+      ...basePayload.aws_data,
+      target_region:
+      basePayload.policy_data["target_region"] ??
+      basePayload.aws_data["target_region"] ??
+      basePayload.aws_data["current_region"],
+      target_country: destinationCountry,
+    };
+
+    const response = await fetchJson<MultiEvaluationResult>(
+      "/api/v1/evaluate-multi",
+      {
         method: "POST",
         body: JSON.stringify({
-          pack_id: selectedPackId,
-          ...packDefinition.buildPayload(formState),
-        }),
-      });
+          origin_country: originCountry,
+          destination_country: destinationCountry,
+          aws_data: awsData,
+          policy_data: {
+  ...basePayload.policy_data,
 
-      startTransition(() => {
-        setEvaluationResult(response);
-        setScreenMode("result");
-        setStatusMessage("평가가 완료되었습니다. 최종 결과 화면을 확인해 주세요.");
-      });
-    } catch (error) {
-      setErrorMessage(buildErrorMessage(error));
-    } finally {
-      setIsBusy(false);
+  // reference pack 데모 안정화를 위한 공통 필드
+  processing_purpose_defined:
+    basePayload.policy_data["processing_purpose_defined"] ?? true,
+  data_minimized:
+    basePayload.policy_data["data_minimized"] ?? true,
+  retention_period_defined:
+    basePayload.policy_data["retention_period_defined"] ?? true,
+
+  // 국가별 정책팩 필드명 차이 보정
+  data_subject_connection:
+    basePayload.policy_data["data_subject_connection"] ??
+    basePayload.policy_data["data_subject_region"] ??
+    originCountry,
+
+  processing_legal_basis:
+    basePayload.policy_data["processing_legal_basis"] ??
+    basePayload.policy_data["lawful_basis"] ??
+    "consent",
+
+  transfer_exception_used:
+    basePayload.policy_data["transfer_exception_used"] ??
+    basePayload.policy_data["derogation_used"] ??
+    false,
+},
+          include_destination_reference: true,
+          extra_pack_ids: [],
+          use_mock_cloud: cloudProvider !== "manual",
+          cloud_provider: cloudProvider,
+          cloud_resource: {
+  region:
+    awsData["target_region"] ??
+    awsData["current_region"] ??
+    "sa-east-1",
+  resource_type: "s3",
+  contains_sensitive_data:
+    awsData["contains_sensitive_data"] ?? true,
+  encryption_at_rest:
+    awsData["encryption_at_rest"] ?? true,
+  encryption_in_transit:
+    awsData["encryption_in_transit"] ?? true,
+  access_control_in_place:
+    awsData["access_control_in_place"] ?? true,
+},
+        }),
+      },
+    );
+
+    const primaryEvaluationResult = response.primary_result.result;
+
+    if (!primaryEvaluationResult) {
+      throw new Error(
+        response.primary_result.error ??
+          "주 적용 정책팩 평가 결과를 불러오지 못했습니다.",
+      );
     }
+
+    startTransition(() => {
+      setMultiEvaluationResult(response);
+      setEvaluationResult(primaryEvaluationResult);
+      setScreenMode("result");
+      setStatusMessage(
+        "동시 적용 평가가 완료되었습니다. 주 적용 법령과 참고 검토 결과를 확인해 주세요.",
+      );
+    });
+  } catch (error) {
+    setErrorMessage(buildErrorMessage(error));
+  } finally {
+    setIsBusy(false);
   }
+}
 
   const availablePackCards = Object.values(PACK_UI_DEFINITIONS).map((definition) => {
     const matchedSummary = packSummaries.find(
@@ -353,9 +496,9 @@ export function GuidedSingleFlowPage() {
 
   if (screenMode === "result" && evaluationResult) {
     return (
-      <main className="app-shell min-h-screen overflow-hidden">
+      <main className="app-shell min-h-screen overflow-visible">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
-          <section className="glass-panel rounded-lg border border-[var(--color-line)] px-5 py-6 sm:px-6">
+          <section className="glass-panel relative z-[999] !overflow-visible rounded-lg border border-[var(--color-line)] p-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
@@ -376,7 +519,7 @@ export function GuidedSingleFlowPage() {
                   variant="secondary"
                 />
                 <ActionButton
-                  label="법제 바꾸기"
+                  label="경로 바꾸기"
                   onClick={() => setScreenMode("intro")}
                   variant="secondary"
                 />
@@ -386,12 +529,96 @@ export function GuidedSingleFlowPage() {
           </section>
 
           <section className="grid gap-5">
-            <ResultPanel evaluationResult={evaluationResult} />
-            <ExplainabilityPanel
-              evaluationResult={evaluationResult}
-              mergePreview={evaluationResult.merged_input}
-            />
-          </section>
+  {multiEvaluationResult ? (
+    <section className="glass-panel relative z-[100] overflow-visible rounded-lg border border-[var(--color-line)] p-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+        Multi-policy Evaluation
+      </p>
+      <h2 className="mt-2 text-xl font-bold text-[var(--color-ink)]">
+        동시 적용 결과 요약
+      </h2>
+      <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+        {multiEvaluationResult.overall_summary}
+      </p>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-4">
+          <p className="text-xs font-semibold text-[var(--color-muted)]">
+            이전 경로
+          </p>
+          <p className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
+            {multiEvaluationResult.origin_country} →{" "}
+            {multiEvaluationResult.destination_country}
+          </p>
+        </div>
+        <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-4">
+          <p className="text-xs font-semibold text-[var(--color-muted)]">
+            주 적용 정책
+          </p>
+          <p className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
+            {PACK_LABELS[multiEvaluationResult.primary_pack_id] ??
+              multiEvaluationResult.primary_pack_id}
+          </p>
+        </div>
+        <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-4">
+          <p className="text-xs font-semibold text-[var(--color-muted)]">
+            참고 검토 정책
+          </p>
+          <p className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
+            {multiEvaluationResult.reference_pack_ids.length > 0
+              ? multiEvaluationResult.reference_pack_ids
+                  .map((id) => PACK_LABELS[id] ?? id)
+                  .join(", ")
+              : "없음"}
+          </p>
+        </div>
+      </div>
+
+      {multiEvaluationResult.overall_warnings.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning-soft)] p-4">
+          <p className="text-sm font-semibold text-[var(--color-warning)]">
+            참고 검토 경고
+          </p>
+          <ul className="mt-2 space-y-1 text-sm leading-7 text-[var(--color-muted)]">
+            {multiEvaluationResult.overall_warnings.map((warning) => (
+              <li key={warning}>- {warning}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        {multiEvaluationResult.results_by_pack.map((item) => (
+          <div
+            key={`${item.role}-${item.pack_id}`}
+            className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-4"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+              {item.role}
+            </p>
+            <p className="mt-2 text-base font-semibold text-[var(--color-ink)]">
+              {PACK_LABELS[item.pack_id] ?? item.pack_id}
+            </p>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">
+              판정: {item.final_decision ?? "오류"}
+            </p>
+            {item.error ? (
+              <p className="mt-2 text-sm leading-7 text-[var(--color-warning)]">
+                {item.error}
+              </p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  ) : null}
+
+  <ResultPanel evaluationResult={evaluationResult} />
+  <ExplainabilityPanel
+    evaluationResult={evaluationResult}
+    mergePreview={evaluationResult.merged_input}
+  />
+</section>
 
           <footer className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] px-5 py-4 text-sm leading-7 text-[var(--color-muted)]">
             <p className="font-semibold text-[var(--color-ink)]">Disclaimer</p>
@@ -424,12 +651,102 @@ export function GuidedSingleFlowPage() {
               onClick={() => setScreenMode("intro")}
               className="text-sm font-medium text-[var(--color-accent)] underline-offset-4 hover:underline"
             >
-              법제 다시 선택
+              경로 다시 선택
             </button>
           ) : null}
         </header>
 
-        <div className="flex flex-1 items-center justify-center">
+        <section className="glass-panel rounded-lg border border-[var(--color-line)] p-5">
+  <div className="grid gap-4 md:grid-cols-3">
+    <div>
+      <label className="text-sm font-semibold text-[var(--color-ink)]">
+        출발 국가
+      </label>
+      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+        데이터가 나가는 국가입니다. 이 국가의 법령을 주 적용 정책으로 사용합니다.
+      </p>
+      <select
+        value={originCountry}
+        onChange={(event) => updateOriginCountry(event.target.value)}
+        className="mt-3 w-full rounded-lg border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)]"
+      >
+        {COUNTRY_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div>
+      <label className="text-sm font-semibold text-[var(--color-ink)]">
+        도착 국가
+      </label>
+      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+        데이터가 도착하는 국가입니다. 참고 검토 정책으로 표시됩니다.
+      </p>
+      <select
+        value={destinationCountry}
+        onChange={(event) => {
+          setDestinationCountry(event.target.value);
+          setErrorMessage(null);
+        }}
+        className="mt-3 w-full rounded-lg border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)]"
+      >
+        {COUNTRY_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div>
+      <label className="text-sm font-semibold text-[var(--color-ink)]">
+        클라우드 연동
+      </label>
+      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+        현재는 발표용 Mock API로 리전/보안 입력을 보완합니다.
+      </p>
+      <select
+        value={cloudProvider}
+        onChange={(event) => {
+          setCloudProvider(event.target.value);
+          setErrorMessage(null);
+        }}
+        className="mt-3 w-full rounded-lg border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)]"
+      >
+        {CLOUD_PROVIDER_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <div className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-4 text-sm leading-7">
+    <p className="font-semibold text-[var(--color-ink)]">
+      자동 적용 정책
+    </p>
+    <p className="mt-1 text-[var(--color-muted)]">
+      주 적용:{" "}
+      <span className="font-semibold text-[var(--color-ink)]">
+        {PACK_LABELS[autoPrimaryPackId] ?? autoPrimaryPackId}
+      </span>
+      {" · "}
+      참고 검토:{" "}
+      <span className="font-semibold text-[var(--color-ink)]">
+        {autoReferencePackId && autoReferencePackId !== autoPrimaryPackId
+          ? PACK_LABELS[autoReferencePackId] ?? autoReferencePackId
+          : "없음"}
+      </span>
+    </p>
+  </div>
+</section>
+        
+
+        <div className="relative z-0 flex flex-1 items-center justify-center">
           <section className="glass-panel w-full overflow-hidden rounded-lg border border-[var(--color-line)] px-5 py-6 sm:px-6 sm:py-7">
             <div
               key={`${selectedPackId}-${screenMode}-${stepIndex}`}
@@ -442,52 +759,50 @@ export function GuidedSingleFlowPage() {
                     Step 0
                   </p>
                   <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-4xl">
-                    어떤 법제로 검토할지 먼저 선택해 주세요
+                    데이터 이전 경로를 확인해 주세요
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
-                    데모 사이트입니다.
+                    출발 국가와 도착 국가를 기준으로 주 적용 법령과 참고 검토 법령이 자동 선택됩니다.
                   </p>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {availablePackCards.map((pack) => {
-                    const isActive = pack.pack_id === selectedPackId;
-                    return (
-                      <button
-                        key={pack.pack_id}
-                        type="button"
-                        onClick={() => setSelectedPackId(pack.pack_id)}
-                        className={`interactive-card rounded-lg border p-5 text-left transition ${
-                          isActive
-                            ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]"
-                            : "border-[var(--color-line)] bg-[var(--color-surface-strong)]"
-                        }`}
-                      >
-                        <p className="text-sm font-semibold text-[var(--color-ink)]">
-                          {pack.pack_name}
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                          {PACK_UI_DEFINITIONS[pack.pack_id]?.subtitle ?? pack.description}
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--color-muted)]">
-                          <span className="rounded-md border border-[var(--color-line)] px-2.5 py-1">
-                            {pack.jurisdiction}
-                          </span>
-                          <span className="rounded-md border border-[var(--color-line)] px-2.5 py-1">
-                            v{pack.version}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+  <div className="rounded-lg border border-[var(--color-accent)] bg-[var(--color-accent-soft)] p-5">
+    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+      주 적용 법령
+    </p>
+    <h3 className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
+      {PACK_LABELS[autoPrimaryPackId] ?? autoPrimaryPackId}
+    </h3>
+    <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+      출발 국가인 {originCountry} 기준으로 최종 판정에 사용됩니다.
+    </p>
+  </div>
+
+  <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-strong)] p-5">
+    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+      참고 검토 법령
+    </p>
+    <h3 className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
+      {autoReferencePackId && autoReferencePackId !== autoPrimaryPackId
+        ? PACK_LABELS[autoReferencePackId] ?? autoReferencePackId
+        : "없음"}
+    </h3>
+    <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+      도착 국가인 {destinationCountry} 기준 참고 결과로 함께 표시됩니다.
+    </p>
+  </div>
+</div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <MetricCard label="선택된 팩" value={packDefinition.label} />
                   <MetricCard
-                    label="입력 방식"
-                    value="한 화면씩 단계 진행"
-                  />
+  label="주 적용 정책"
+  value={PACK_LABELS[autoPrimaryPackId] ?? autoPrimaryPackId}
+/>
+                  <MetricCard
+  label="적용 방식"
+  value="출발국 중심 + 도착국 참고"
+/>
                   <MetricCard
                     label="규칙 수"
                     value={packDetail ? `${packDetail.rule_count} rules` : "로딩 중"}
@@ -508,7 +823,7 @@ export function GuidedSingleFlowPage() {
 
                 <div className="flex flex-wrap gap-3">
                   <ActionButton
-                    label="시작하기"
+                    label="검토 입력 시작"
                     onClick={() => {
                       setStepIndex(0);
                       setScreenMode("step");

@@ -392,153 +392,41 @@ export function SelectField({
   options: FieldOption[];
 }) {
   const labelId = useId();
-  const listboxId = useId();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
+
   const selectedOption = options.find((option) => option.value === value);
-  const displayedOption = selectedOption ?? options[0];
-  const highlightedOption =
-    options.find(
-      (option) => option.value === (highlightedValue ?? value),
-    ) ?? displayedOption;
-  const isPlaceholder = !value;
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    function closeOnOutsidePointer(event: MouseEvent) {
-      const container = containerRef.current;
-
-      if (container && !container.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", closeOnOutsidePointer);
-
-    return () => {
-      document.removeEventListener("mousedown", closeOnOutsidePointer);
-    };
-  }, [open]);
-
-  function moveHighlight(direction: 1 | -1) {
-    if (options.length === 0) {
-      return;
-    }
-
-    const currentValue = highlightedValue ?? value;
-    const currentIndex = Math.max(
-      0,
-      options.findIndex((option) => option.value === currentValue),
-    );
-    const nextIndex =
-      (currentIndex + direction + options.length) % options.length;
-
-    setHighlightedValue(options[nextIndex]?.value ?? null);
-    setOpen(true);
-  }
-
-  function selectOption(nextValue: string) {
-    onChange(nextValue);
-    setHighlightedValue(nextValue);
-    setOpen(false);
-  }
 
   return (
-    <div ref={containerRef} className="relative block">
-      <span
+    <div>
+      <label
         id={labelId}
         className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]"
       >
         {label}
         {tooltip ? <HelpTooltip content={tooltip} /> : null}
-      </span>
-      <span className="mt-1 block text-sm text-[var(--color-muted)]">{helper}</span>
-      <button
-        type="button"
-        aria-labelledby={labelId}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-controls={listboxId}
-        onClick={() => {
-          setOpen((current) => !current);
-          setHighlightedValue(value || options[0]?.value || null);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowDown") {
-            event.preventDefault();
-            moveHighlight(1);
-          } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveHighlight(-1);
-          } else if (event.key === "Escape") {
-            setOpen(false);
-          } else if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            if (open && highlightedValue !== null) {
-              selectOption(highlightedValue);
-            } else {
-              setOpen(true);
-              setHighlightedValue(value || options[0]?.value || null);
-            }
-          }
-        }}
-        className={`mt-3 flex w-full items-center justify-between gap-3 rounded-lg border border-[var(--color-line)] bg-white px-4 py-3 text-left text-sm outline-none transition focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)] ${
-          isPlaceholder ? "text-[var(--color-muted)]" : "text-[var(--color-ink)]"
-        }`}
-      >
-        <span>{displayedOption?.label ?? "선택"}</span>
-        <span className="text-xs font-semibold text-[var(--color-muted)]">v</span>
-      </button>
-      {open ? (
-        <div
-          id={listboxId}
-          role="listbox"
-          aria-labelledby={labelId}
-          className="absolute left-0 right-0 z-50 mt-2 max-h-80 overflow-auto rounded-lg border border-[var(--color-line)] bg-white p-1 shadow-[0_18px_36px_rgba(15,23,42,0.16)]"
-        >
-          {options.map((option) => {
-            const selected = option.value === value;
-            const highlighted = option.value === highlightedOption?.value;
+      </label>
 
-            return (
-              <button
-                key={`${label}-${option.value}`}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                title={option.description}
-                onMouseEnter={() => setHighlightedValue(option.value)}
-                onFocus={() => setHighlightedValue(option.value)}
-                onClick={() => selectOption(option.value)}
-                className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${
-                  highlighted
-                    ? "bg-[var(--color-accent-soft)] text-[var(--color-ink)]"
-                    : "text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)]"
-                }`}
-              >
-                <span className="flex items-start justify-between gap-3">
-                  <span className={option.value ? "font-semibold" : "text-[var(--color-muted)]"}>
-                    {option.label}
-                  </span>
-                  {selected ? (
-                    <span className="text-xs font-semibold text-[var(--color-accent)]">
-                      선택됨
-                    </span>
-                  ) : null}
-                </span>
-                {highlighted && option.description ? (
-                  <span className="mt-1 block text-xs leading-5 text-[var(--color-muted)]">
-                    예시: {option.description}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+        {helper}
+      </p>
+
+      <select
+        aria-labelledby={labelId}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        title={selectedOption?.description}
+        className="mt-3 w-full rounded-lg border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent-soft)]"
+      >
+        {options.map((option) => (
+          <option key={`${label}-${option.value}`} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {selectedOption?.description ? (
+        <p className="mt-2 text-xs leading-5 text-[var(--color-muted)]">
+          예시: {selectedOption.description}
+        </p>
       ) : null}
     </div>
   );
