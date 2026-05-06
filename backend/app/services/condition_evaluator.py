@@ -1,10 +1,14 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from app.core.constants import FIELD_LABELS_KO
 
 
-def humanize_field_name(field: str) -> str:
-    return FIELD_LABELS_KO.get(field, field.replace("_", " "))
+def humanize_field_name(field: str | None) -> str:
+    if field is None:
+        return "미지정 필드"
+
+    safe_field = str(field)
+    return FIELD_LABELS_KO.get(safe_field, safe_field.replace("_", " "))
 
 
 def format_value(value: Any) -> str:
@@ -19,9 +23,64 @@ def format_value(value: Any) -> str:
     return str(value)
 
 
+def extract_binary_condition(
+    condition: Dict[str, Any],
+    operator: str,
+) -> Tuple[str | None, Any]:
+    """
+    기존 정책팩 형식:
+        {"field": "foo", "eq": true}
+
+    destination pack에서 사용한 축약 형식:
+        {"eq": ["foo", true]}
+
+    두 형식을 모두 지원한다.
+    """
+    raw_value = condition.get(operator)
+    field = condition.get("field")
+
+    if (
+        field is None
+        and isinstance(raw_value, list)
+        and len(raw_value) == 2
+        and isinstance(raw_value[0], str)
+    ):
+        return raw_value[0], raw_value[1]
+
+    return field, raw_value
+
+
+def extract_in_condition(
+    condition: Dict[str, Any],
+) -> Tuple[str | None, List[Any]]:
+    """
+    기존 형식:
+        {"field": "foo", "in": ["a", "b"]}
+
+    축약 형식:
+        {"in": ["foo", ["a", "b"]]}
+    """
+    raw_value = condition.get("in")
+    field = condition.get("field")
+
+    if (
+        field is None
+        and isinstance(raw_value, list)
+        and len(raw_value) == 2
+        and isinstance(raw_value[0], str)
+        and isinstance(raw_value[1], list)
+    ):
+        return raw_value[0], raw_value[1]
+
+    if isinstance(raw_value, list):
+        return field, raw_value
+
+    return field, []
+
+
 def build_leaf_result(
     *,
-    field: str,
+    field: str | None,
     actual: Any,
     matched: bool,
     expectation: str,
@@ -50,7 +109,10 @@ def evaluate_condition_with_trace(
         }
 
     if "all" in condition:
-        sub_results = [evaluate_condition_with_trace(sub, context) for sub in condition["all"]]
+        sub_results = [
+            evaluate_condition_with_trace(sub, context)
+            for sub in condition["all"]
+        ]
         matched = all(result["matched"] for result in sub_results)
         facts: List[str] = []
         unmet_facts: List[str] = []
@@ -66,7 +128,10 @@ def evaluate_condition_with_trace(
         }
 
     if "any" in condition:
-        sub_results = [evaluate_condition_with_trace(sub, context) for sub in condition["any"]]
+        sub_results = [
+            evaluate_condition_with_trace(sub, context)
+            for sub in condition["any"]
+        ]
         matched_results = [result for result in sub_results if result["matched"]]
         matched = len(matched_results) > 0
 
@@ -100,11 +165,10 @@ def evaluate_condition_with_trace(
             "unmet_facts": [] if matched else [statement],
         }
 
-    field = condition.get("field")
-    actual = context.get(field)
-
     if "eq" in condition:
-        expected = condition["eq"]
+        field, expected = extract_binary_condition(condition, "eq")
+        actual = context.get(field)
+
         return build_leaf_result(
             field=field,
             actual=actual,
@@ -113,7 +177,9 @@ def evaluate_condition_with_trace(
         )
 
     if "neq" in condition:
-        expected = condition["neq"]
+        field, expected = extract_binary_condition(condition, "neq")
+        actual = context.get(field)
+
         return build_leaf_result(
             field=field,
             actual=actual,
@@ -122,14 +188,20 @@ def evaluate_condition_with_trace(
         )
 
     if "in" in condition:
-        allowed_values = condition["in"]
+        field, allowed_values = extract_in_condition(condition)
+        actual = context.get(field)
+
         allowed_text = ", ".join(format_value(item) for item in allowed_values)
+
         return build_leaf_result(
             field=field,
             actual=actual,
             matched=actual in allowed_values,
             expectation=f"[{allowed_text}] 중 하나",
         )
+
+    field = condition.get("field")
+    actual = context.get(field)
 
     if condition.get("not_null") is True:
         return build_leaf_result(

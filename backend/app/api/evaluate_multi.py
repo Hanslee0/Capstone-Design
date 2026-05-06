@@ -13,6 +13,47 @@ from app.services.multi_evaluation_service import evaluate_multiple_packs
 
 router = APIRouter(prefix="/api/v1", tags=["multi-evaluate"])
 
+def apply_destination_defaults(policy_data: dict) -> dict:
+    defaults = {
+        "processing_purpose_defined": True,
+        "processing_legal_basis": "contract",
+        "processing_legal_basis_available": True,
+        "data_minimized": True,
+
+        "contains_sensitive_data": False,
+        "special_category_condition_met": True,
+        "explicit_consent_for_sensitive_data": True,
+
+        "privacy_policy_available": True,
+        "transfer_notice_provided": True,
+        "cross_border_notice_provided": True,
+        "data_subject_rights_request_ready": True,
+
+        "retention_period_defined": True,
+        "retention_policy_available": True,
+
+        "recipient_contract_available": True,
+        "processor_contract_available": True,
+        "dpa_available": True,
+
+        "security_measures_available": True,
+        "encryption_at_rest": True,
+        "encryption_in_transit": True,
+        "access_control_in_place": True,
+
+        "incident_response_in_place": True,
+        "risk_assessment_completed": True,
+        "appropriate_safeguards_available": True,
+    }
+
+    cleaned = dict(policy_data or {})
+
+    for key, value in defaults.items():
+        if key not in cleaned or cleaned.get(key) is None:
+            cleaned[key] = value
+
+    return cleaned
+
 
 @router.post("/applicable-packs", response_model=ApplicablePacksResponse)
 def get_applicable_packs(payload: ApplicablePacksRequest):
@@ -55,11 +96,13 @@ def evaluate_multi(payload: MultiEvaluateRequest):
 
             aws_data.update(merged_cloud_input)
 
+        cleaned_policy_data = apply_destination_defaults(payload.policy_data)
+
         return evaluate_multiple_packs(
             origin_country=payload.origin_country,
             destination_country=payload.destination_country,
             aws_data=aws_data,
-            policy_data=payload.policy_data,
+            policy_data=cleaned_policy_data,
             include_destination_reference=payload.include_destination_reference,
             extra_pack_ids=payload.extra_pack_ids,
             merged_cloud_input=merged_cloud_input,
