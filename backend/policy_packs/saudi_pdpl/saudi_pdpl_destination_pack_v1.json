@@ -1,0 +1,1166 @@
+{
+  "pack_id": "saudi_pdpl_destination",
+  "pack_name": "Saudi PDPL Destination Compliance Pack",
+  "jurisdiction": "Saudi Arabia",
+  "version": "1.0.0",
+  "description": "사우디아라비아로 유입되어 사우디 내 개인과 관련되는 개인정보를 처리하는 경우 PDPL 기준의 처리 목적, 동의/근거, 고지, 권리, 보관·파기, 보안조치, 침해 대응, 국외 재이전 제한을 검토하는 정책팩입니다.",
+  "disclaimer": "This policy pack is a rule-based compliance aid and does not constitute legal advice. Review by privacy/legal counsel is required before operational use.",
+  "covered_categories": [
+    "destination_scope",
+    "processing_purpose",
+    "legal_basis",
+    "data_minimization",
+    "sensitive_data",
+    "transparency",
+    "data_subject_rights",
+    "retention_deletion",
+    "controller_processor",
+    "security",
+    "incident_response",
+    "accountability",
+    "transfer_safeguards"
+  ],
+  "supported_decisions": [
+    "allow",
+    "allow_with_conditions",
+    "manual_review",
+    "deny"
+  ],
+  "decision_model": {
+    "default_decision": "allow",
+    "precedence": [
+      "deny",
+      "manual_review",
+      "allow_with_conditions",
+      "allow"
+    ],
+    "description": "도착국 처리 적법성 검토에서는 필수 준비사항이 부족하면 manual_review를 우선합니다."
+  },
+  "source_references": [
+    "Saudi PDPL Art. 2, 4-6, 11-13, 18-22, 29-32"
+  ],
+  "assumptions": [
+    "기존 반출국 정책팩은 국외이전 가능 여부를 평가하고, destination pack은 도착국에서 수신 후 처리 적법성을 검토합니다.",
+    "현재 프론트 입력 스키마와 기존 병합 로직의 공통 필드를 최대한 재사용합니다.",
+    "법률 자문을 대체하지 않으며, manual_review 결과는 법무/개인정보 담당자 확인이 필요합니다."
+  ],
+  "rules": [
+    {
+      "rule_id": "SAUDI_PDPL_DEST_BASELINE_REVIEW",
+      "article": "Saudi PDPL Art. 2",
+      "title": "Saudi Arabia 도착국 검토 적용",
+      "category": "destination_scope",
+      "priority": 1,
+      "decision": "allow",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "destination_country",
+              "Saudi Arabia"
+            ]
+          },
+          {
+            "eq": [
+              "target_country",
+              "Saudi Arabia"
+            ]
+          },
+          {
+            "eq": [
+              "destination_country",
+              "Saudi"
+            ]
+          },
+          {
+            "eq": [
+              "target_country",
+              "Saudi"
+            ]
+          },
+          {
+            "eq": [
+              "destination_country",
+              "Kingdom of Saudi Arabia"
+            ]
+          },
+          {
+            "eq": [
+              "target_country",
+              "Kingdom of Saudi Arabia"
+            ]
+          },
+          {
+            "eq": [
+              "destination_country",
+              "사우디"
+            ]
+          },
+          {
+            "eq": [
+              "target_country",
+              "사우디"
+            ]
+          },
+          {
+            "eq": [
+              "destination_country",
+              "사우디아라비아"
+            ]
+          },
+          {
+            "eq": [
+              "target_country",
+              "사우디아라비아"
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 도착국 처리 적법성 검토가 적용됩니다.",
+      "explanation_template": "Saudi Arabia 도착국 처리 적법성 검토가 적용됩니다.",
+      "required_evidence": [
+        "도착국",
+        "수신자 정보",
+        "처리 위치",
+        "처리 목적"
+      ],
+      "required_actions": [
+        "Saudi Arabia 내 수신 후 처리 목적, 근거, 보안조치, 권리 대응 체계를 확인하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 2"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_PURPOSE_MISSING",
+      "article": "Saudi PDPL Art. 4, 11",
+      "title": "도착국 내 처리 목적 확인 필요",
+      "category": "processing_purpose",
+      "priority": 100,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "processing_purpose_defined",
+              false
+            ]
+          },
+          {
+            "eq": [
+              "processing_purpose_defined",
+              "false"
+            ]
+          },
+          {
+            "eq": [
+              "processing_purpose_defined",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "processing_purpose_defined",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "processing_purpose_defined",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 내 개인정보 처리 목적이 명확하게 정의되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 내 개인정보 처리 목적이 명확하게 정의되지 않았습니다.",
+      "required_evidence": [
+        "처리 목적 설명",
+        "서비스/계약/업무상 필요성 문서",
+        "정보주체 고지 내용"
+      ],
+      "required_actions": [
+        "수신자가 데이터를 어떤 목적으로 처리하는지 구체적으로 문서화하세요.",
+        "처리 목적이 정보주체에게 고지된 목적과 호환되는지 확인하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 4, 11"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_LEGAL_BASIS_MISSING",
+      "article": "Saudi PDPL Art. 5, 6",
+      "title": "도착국 내 처리 근거 확인 필요",
+      "category": "legal_basis",
+      "priority": 105,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "processing_legal_basis",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "processing_legal_basis",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "processing_legal_basis",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 법령 기준 개인정보 처리 근거가 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 법령 기준 개인정보 처리 근거가 확인되지 않았습니다.",
+      "required_evidence": [
+        "도착국 기준 처리 근거",
+        "동의/계약/법적 의무/정당한 이익 등 근거 자료"
+      ],
+      "required_actions": [
+        "도착국 기준 처리 근거를 확인하고 policy_data.processing_legal_basis에 반영하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 5, 6"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_DATA_MINIMIZATION_MISSING",
+      "article": "Saudi PDPL Art. 11",
+      "title": "데이터 최소화 확인 필요",
+      "category": "data_minimization",
+      "priority": 80,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "data_minimized",
+              false
+            ]
+          },
+          {
+            "eq": [
+              "data_minimized",
+              "false"
+            ]
+          },
+          {
+            "eq": [
+              "data_minimized",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "data_minimized",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "data_minimized",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 처리 목적에 필요한 최소한의 데이터만 처리되는지 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 처리 목적에 필요한 최소한의 데이터만 처리되는지 확인되지 않았습니다.",
+      "required_evidence": [
+        "이전 데이터 항목 목록",
+        "각 항목별 처리 목적",
+        "불필요 데이터 제외 검토 기록"
+      ],
+      "required_actions": [
+        "도착국 수신자가 처리하는 데이터 항목을 목적별로 검토하고 최소화하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 11"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_SENSITIVE_DATA_REVIEW_REQUIRED",
+      "article": "Saudi PDPL Art. 1, 23, 35",
+      "title": "민감정보 처리 및 추가 보호조치 확인 필요",
+      "category": "sensitive_data",
+      "priority": 110,
+      "decision": "manual_review",
+      "when": {
+        "all": [
+          {
+            "eq": [
+              "contains_sensitive_data",
+              true
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 도착 후 처리 대상에 민감정보가 포함되어 있으나 추가 보호조치가 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 도착 후 처리 대상에 민감정보가 포함되어 있으나 추가 보호조치가 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "민감정보 유형",
+        "민감정보 처리 근거",
+        "추가 보안조치",
+        "계약상 보호조치"
+      ],
+      "required_actions": [
+        "민감정보 처리 근거와 추가 보호조치를 별도로 확인하세요.",
+        "필요하지 않은 민감정보는 이전 대상에서 제외하거나 익명화/가명화하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 1, 23, 35"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_TRANSPARENCY_NOTICE_MISSING",
+      "article": "Saudi PDPL Art. 12, 13",
+      "title": "고지 및 투명성 확인 필요",
+      "category": "transparency",
+      "priority": 90,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "any": [
+              {
+                "eq": [
+                  "privacy_policy_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "privacy_policy_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "privacy_policy_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "privacy_policy_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "privacy_policy_available",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "transfer_notice_provided",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "transfer_notice_provided",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "transfer_notice_provided",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "transfer_notice_provided",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "transfer_notice_provided",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "cross_border_notice_provided",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "cross_border_notice_provided",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "cross_border_notice_provided",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "cross_border_notice_provided",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "cross_border_notice_provided",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 내 처리 또는 이전에 관한 고지/처리방침이 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 내 처리 또는 이전에 관한 고지/처리방침이 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "개인정보 처리방침",
+        "수신자 및 처리 목적 고지",
+        "권리 행사 방법 안내",
+        "국외이전 고지"
+      ],
+      "required_actions": [
+        "처리 목적, 수신자, 보관기간, 권리 행사 방법, 이전 관련 정보를 정보주체에게 명확히 고지하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 12, 13"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_RIGHTS_PROCESS_NOT_READY",
+      "article": "Saudi PDPL Art. 4, 21",
+      "title": "정보주체 권리 대응 체계 확인 필요",
+      "category": "data_subject_rights",
+      "priority": 95,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "data_subject_rights_request_ready",
+              false
+            ]
+          },
+          {
+            "eq": [
+              "data_subject_rights_request_ready",
+              "false"
+            ]
+          },
+          {
+            "eq": [
+              "data_subject_rights_request_ready",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "data_subject_rights_request_ready",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "data_subject_rights_request_ready",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 법령 기준 정보주체 권리 요청 대응 체계가 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 법령 기준 정보주체 권리 요청 대응 체계가 확인되지 않았습니다.",
+      "required_evidence": [
+        "열람/정정/삭제/처리정지 요청 절차",
+        "권리 요청 접수 채널",
+        "수신자와 발신자 간 요청 전달 절차"
+      ],
+      "required_actions": [
+        "정보주체 권리 요청을 접수하고 처리할 운영 절차를 마련하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 4, 21"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_RETENTION_OR_DELETION_MISSING",
+      "article": "Saudi PDPL Art. 18",
+      "title": "보관기간 및 삭제 절차 확인 필요",
+      "category": "retention_deletion",
+      "priority": 75,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "any": [
+              {
+                "eq": [
+                  "retention_period_defined",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "retention_period_defined",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "retention_period_defined",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "retention_period_defined",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "retention_period_defined",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "retention_policy_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "retention_policy_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "retention_policy_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "retention_policy_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "retention_policy_available",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 내 처리 종료 후 보관기간 또는 삭제 절차가 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 내 처리 종료 후 보관기간 또는 삭제 절차가 확인되지 않았습니다.",
+      "required_evidence": [
+        "보관기간 정책",
+        "삭제/파기 절차",
+        "법정 보관 예외 근거"
+      ],
+      "required_actions": [
+        "처리 목적 달성 후 삭제, 파기, 익명화 또는 법정 보관 근거를 명확히 하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 18"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_PROCESSOR_CONTRACT_MISSING",
+      "article": "Saudi PDPL Art. 1, 30, 31",
+      "title": "수신자 역할 및 처리자 계약 확인 필요",
+      "category": "controller_processor",
+      "priority": 85,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "any": [
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "processor_contract_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "processor_contract_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "processor_contract_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "processor_contract_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "processor_contract_available",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "dpa_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "dpa_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "dpa_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "dpa_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "dpa_available",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 수신자의 역할 또는 처리자 계약/DPA가 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 수신자의 역할 또는 처리자 계약/DPA가 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "수신자 역할",
+        "DPA 또는 처리위탁계약",
+        "처리 지시 및 책임 분담 조항",
+        "재위탁 통제 조항"
+      ],
+      "required_actions": [
+        "수신자가 controller인지 processor인지 구분하고 계약상 책임, 보안 의무, 권리 요청 지원 의무를 명확히 하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 1, 30, 31"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_SECURITY_MEASURES_MISSING",
+      "article": "Saudi PDPL Art. 19",
+      "title": "보안조치 확인 필요",
+      "category": "security",
+      "priority": 100,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "any": [
+              {
+                "eq": [
+                  "security_measures_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "security_measures_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "security_measures_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "security_measures_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "security_measures_available",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "encryption_at_rest",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_at_rest",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_at_rest",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_at_rest",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_at_rest",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "encryption_in_transit",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_in_transit",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_in_transit",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_in_transit",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "encryption_in_transit",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "access_control_in_place",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "access_control_in_place",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "access_control_in_place",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "access_control_in_place",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "access_control_in_place",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 내 처리에 필요한 기술적·관리적 보안조치가 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 내 처리에 필요한 기술적·관리적 보안조치가 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "저장 시 암호화",
+        "전송 시 암호화",
+        "접근통제",
+        "로그/모니터링",
+        "권한관리 정책"
+      ],
+      "required_actions": [
+        "저장/전송 암호화, 접근통제, 권한관리, 사고 대응 체계를 확인하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 19"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_INCIDENT_RESPONSE_MISSING",
+      "article": "Saudi PDPL Art. 20",
+      "title": "침해사고 대응 체계 확인 필요",
+      "category": "incident_response",
+      "priority": 85,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "risk_assessment_completed",
+              false
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              "false"
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 기준 침해사고 대응, 통지, 기록, 피해 완화 절차가 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 기준 침해사고 대응, 통지, 기록, 피해 완화 절차가 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "침해사고 대응 절차",
+        "감독기관/정보주체 통지 절차",
+        "사고 기록 관리"
+      ],
+      "required_actions": [
+        "도착국 기준 침해사고 통지 및 대응 절차를 운영 문서와 계약에 반영하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 20"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_TRANSFER_SAFEGUARDS_MISSING",
+      "article": "Saudi PDPL Art. 29",
+      "title": "국제이전 보호조치 및 후속 이전 통제 확인 필요",
+      "category": "transfer_safeguards",
+      "priority": 100,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "any": [
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "appropriate_safeguards_available",
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  false
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  "false"
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  "unknown"
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  ""
+                ]
+              },
+              {
+                "eq": [
+                  "recipient_contract_available",
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 도착 후 처리와 관련된 이전 보호조치 또는 수신자 계약이 충분히 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 도착 후 처리와 관련된 이전 보호조치 또는 수신자 계약이 충분히 확인되지 않았습니다.",
+      "required_evidence": [
+        "국제이전 근거",
+        "계약상 보호조치",
+        "수신자 계약",
+        "후속 이전 통제"
+      ],
+      "required_actions": [
+        "도착국 수신자와의 계약상 보호조치 및 후속 이전 제한을 확인하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 29"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    },
+    {
+      "rule_id": "SAUDI_PDPL_DEST_ACCOUNTABILITY_MISSING",
+      "article": "Saudi PDPL Art. 22, 30, 31, 32",
+      "title": "책임성 및 준수 입증 자료 확인 필요",
+      "category": "accountability",
+      "priority": 70,
+      "decision": "manual_review",
+      "when": {
+        "any": [
+          {
+            "eq": [
+              "risk_assessment_completed",
+              false
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              "false"
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              "unknown"
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              ""
+            ]
+          },
+          {
+            "eq": [
+              "risk_assessment_completed",
+              null
+            ]
+          }
+        ]
+      },
+      "message": "Saudi Arabia 법령 기준 준수 입증을 위한 위험평가 또는 책임성 자료가 확인되지 않았습니다.",
+      "explanation_template": "Saudi Arabia 법령 기준 준수 입증을 위한 위험평가 또는 책임성 자료가 확인되지 않았습니다.",
+      "required_evidence": [
+        "위험평가",
+        "처리기록",
+        "보안조치 증빙",
+        "권리 대응 절차"
+      ],
+      "required_actions": [
+        "도착국 내 처리에 대한 위험평가와 준수 증빙 자료를 준비하세요."
+      ],
+      "references": [
+        "Saudi PDPL Art. 22, 30, 31, 32"
+      ],
+      "reviewer_notes": [
+        "도착국에서 수신 후 개인정보를 처리할 준비가 되어 있는지 확인하는 destination compliance 규칙입니다."
+      ]
+    }
+  ]
+}

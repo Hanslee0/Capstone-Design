@@ -37,6 +37,31 @@ PACK_REGISTRY = {
         "default_pack_file": "pipa_pack_v1.json",
         "default_schema_file": "input_schema_v1.json",
     },
+    "lgpd_destination": {
+        "directory": "lgpd",
+        "default_pack_file": "lgpd_destination_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
+    "gdpr_destination": {
+    "directory": "gdpr",
+    "default_pack_file": "gdpr_destination_pack_v1.json",
+    "default_schema_file": "input_schema_v2.json",
+    },
+    "korea_pipa_destination": {
+        "directory": "korea_pipa",
+        "default_pack_file": "pipa_destination_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
+    "saudi_pdpl_destination": {
+        "directory": "saudi_pdpl",
+        "default_pack_file": "saudi_pdpl_destination_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
+    "taiwan_destination": {
+        "directory": "taiwan_pdpa",
+        "default_pack_file": "taiwan_destination_pack_v1.json",
+        "default_schema_file": "input_schema_v1.json",
+    },
 }
 
 

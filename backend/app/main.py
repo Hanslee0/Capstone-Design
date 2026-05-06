@@ -2,9 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.evaluate import router as evaluate_router
+from app.api.evaluate_multi import router as evaluate_multi_router
 from app.api.merge import router as merge_router
 from app.api.packs import router as packs_router
 from app.api.samples import router as samples_router
+
 
 app = FastAPI(
     title="Border Checker API",
@@ -28,8 +30,8 @@ app.add_middleware(
 app.include_router(merge_router)
 app.include_router(packs_router)
 app.include_router(evaluate_router)
+app.include_router(evaluate_multi_router)
 app.include_router(samples_router)
-
 
 @app.get("/")
 def read_root():

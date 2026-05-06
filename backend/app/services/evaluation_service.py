@@ -14,6 +14,8 @@ from app.services.resolution_service import (
     resolve_final_decision,
 )
 
+def stringify_items(items: List[Any]) -> List[str]:
+    return [str(item) for item in items if item is not None]
 
 def build_pack_info(pack_data: Dict[str, Any]) -> Dict[str, str]:
     return {
@@ -25,8 +27,9 @@ def build_pack_info(pack_data: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
-def build_rule_rationale(rule: Dict[str, Any], matched_facts: List[str]) -> str:
-    facts_text = "; ".join(matched_facts)
+def build_rule_rationale(rule: Dict[str, Any], matched_facts: List[Any]) -> str:
+    safe_facts = stringify_items(matched_facts)
+    facts_text = "; ".join(safe_facts)
     explanation_template = rule.get("explanation_template")
 
     if explanation_template and facts_text:
@@ -105,7 +108,9 @@ def evaluate_rules(
     for rule in rules:
         when_clause = rule.get("when", {})
         condition_result = evaluate_condition_with_trace(when_clause, merged_input)
-        reasoning = condition_result["facts"] or condition_result["unmet_facts"]
+        reasoning = stringify_items(
+            condition_result["facts"] or condition_result["unmet_facts"]
+        )
 
         rule_results.append(
             {
@@ -121,11 +126,11 @@ def evaluate_rules(
         if not condition_result["matched"]:
             continue
 
-        matched_facts = condition_result["facts"]
+        matched_facts = stringify_items(condition_result["facts"])
         triggered_rules.append(
             {
                 "rule_id": rule["rule_id"],
-                "article": rule["article"],
+                "article": str(rule["article"]),
                 "title": rule["title"],
                 "category": rule["category"],
                 "priority": rule["priority"],
@@ -143,8 +148,12 @@ def evaluate_rules(
     triggered_rules = sort_triggered_rules(triggered_rules, decision_order)
 
     final_decision = resolve_final_decision(triggered_rules, decision_order)
-    legal_basis_articles = collect_legal_basis_articles(triggered_rules)
-    required_actions = collect_required_actions(triggered_rules)
+    legal_basis_articles = stringify_items(
+        collect_legal_basis_articles(triggered_rules)
+    )
+    required_actions = stringify_items(
+        collect_required_actions(triggered_rules)
+    )
 
     summary = build_summary(final_decision, triggered_rules)
     explanation = build_explanation(
