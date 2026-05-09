@@ -44,6 +44,18 @@ def apply_destination_defaults(policy_data: dict) -> dict:
         "incident_response_in_place": True,
         "risk_assessment_completed": True,
         "appropriate_safeguards_available": True,
+        
+        "agency_type": "non_public_agency",
+        "specific_purpose_defined": True,
+        "collection_processing_basis": "contract",
+        "collected_directly_from_data_subject": True,
+        "article8_notice_provided": True,
+        "security_maintenance_measures_ready": True,
+        "cross_border_transfer": True,
+        
+        "data_subject_region": "EU",
+        "lawful_basis": "contract",
+        "derogation_used": False,
     }
 
     cleaned = dict(policy_data or {})

@@ -73,6 +73,39 @@ const yesNoUnknownOptions: FieldOption[] = [
   { value: "unknown", label: "잘 모르겠음" },
 ];
 
+const destinationLegalBasisOptions: FieldOption[] = [
+  {
+    value: "contract",
+    label: "계약 이행",
+    description: "도착국에서 계약 이행을 위해 필요한 처리입니다.",
+  },
+  {
+    value: "consent",
+    label: "동의",
+    description: "정보주체의 동의를 근거로 처리합니다.",
+  },
+  {
+    value: "legal_obligation",
+    label: "법적 의무",
+    description: "도착국 법령상 의무 이행에 필요한 처리입니다.",
+  },
+  {
+    value: "legitimate_interest",
+    label: "정당한 이익",
+    description: "보안, 부정사용 방지 등 정당한 이익에 근거한 처리입니다.",
+  },
+  {
+    value: "public_interest",
+    label: "공익 또는 공공업무",
+    description: "공익 또는 공공기관 업무와 연결된 처리입니다.",
+  },
+  {
+    value: "unknown",
+    label: "잘 모르겠음",
+    description: "도착국 내 처리 근거가 아직 확정되지 않았습니다.",
+  },
+];
+
 const gdprLawfulBasisOptions: FieldOption[] = [
   ...lawfulBasisOptions,
   {
@@ -355,6 +388,77 @@ const saudiDefaultState: GuidedFormState = {
   breach_response_72h_ready: "unknown",
 };
 
+const destinationComplianceStep = {
+  id: "destination_compliance",
+  title: "도착국 처리 적법성 검토",
+  description:
+    "데이터가 도착국에 들어간 뒤 현지 법령 기준으로 처리할 준비가 되어 있는지 확인합니다.",
+  fields: [
+    {
+      key: "destination_processing_legal_basis",
+      label: "도착국 내 처리 법적 근거",
+      helper: "도착국에서 이 데이터를 처리할 근거를 선택하세요.",
+      kind: "select",
+      options: emptyFirst(destinationLegalBasisOptions, "처리 근거 선택"),
+      required: true,
+    },
+    {
+      key: "destination_recipient_contract_available",
+      label: "도착국 수신자와 계약 또는 DPA가 있나요?",
+      helper:
+        "수신자 역할, 처리 목적, 보안조치, 정보주체 권리 대응 의무가 계약에 포함되어 있는지 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+    {
+      key: "destination_data_subject_rights_request_ready",
+      label: "도착국 기준 정보주체 권리 요청에 대응할 수 있나요?",
+      helper:
+        "열람, 정정, 삭제, 처리정지, 동의 철회 등 요청 대응 절차가 있는지 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+    {
+      key: "destination_retention_period_defined",
+      label: "도착국 내 보관기간과 삭제 절차가 정해져 있나요?",
+      helper:
+        "처리 목적 달성 후 삭제, 파기, 익명화 또는 법정 보관 근거가 있는지 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+    {
+      key: "destination_security_measures_available",
+      label: "도착국 수신자의 보안조치가 확인되었나요?",
+      helper:
+        "암호화, 접근통제, 권한관리, 로그, 침해 대응 체계가 있는지 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+    {
+      key: "destination_incident_response_in_place",
+      label: "도착국 기준 침해사고 대응 절차가 있나요?",
+      helper:
+        "감독기관 또는 정보주체 통지, 사고 기록, 피해 완화 절차가 있는지 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+    {
+      key: "destination_appropriate_safeguards_available",
+      label: "도착국 처리에 필요한 추가 보호조치가 있나요?",
+      helper:
+        "민감정보, 재이전, 외부 처리자 이용이 있는 경우 추가 보호조치를 확인합니다.",
+      kind: "segmented",
+      options: yesNoUnknownOptions,
+      required: true,
+    },
+  ],
+} as const;
+
 const gdprSteps = [
   {
     id: "context",
@@ -428,7 +532,8 @@ const gdprSteps = [
       { key: "dpo_required", label: "개인정보 보호 책임자 지정이 필요한지 알고 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두세요.", tooltip: "대규모 모니터링, 민감정보 대규모 처리 등에서는 필요할 수 있습니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: needsGdprElevatedGovernanceQuestions },
       { key: "dpo_assigned", label: "DPO 지정 완료", helper: "필요한 경우 실제 지정했나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.dpo_required === "true" }
     ]
-  }
+  },
+  destinationComplianceStep,
 ] as const;
 
 const saudiSteps = [
@@ -503,7 +608,8 @@ const saudiSteps = [
       { key: "dpo_required", label: "개인정보 보호 책임자 지정이 필요한지 알고 있나요?", helper: "정확히 모르면 잘 모르겠음으로 두세요.", tooltip: "민감정보나 대규모 처리라면 공식 기준에 따라 먼저 판단하는 편이 좋습니다.", kind: "segmented", options: yesNoUnknownOptions, required: true, visibleIf: (state: GuidedFormState) => state.contains_sensitive_data === "true" || state.large_scale_or_continuous_transfer === "true" },
       { key: "dpo_assigned", label: "DPO 지정 완료", helper: "필요한 경우 실제 지정했나요?", kind: "segmented", options: yesNoOptions, required: true, visibleIf: (state: GuidedFormState) => state.dpo_required === "true" }
     ]
-  }
+  },
+  destinationComplianceStep,
 ] as const;
 
 // 🇹🇼 대만 기본 상태 및 단계
@@ -539,6 +645,7 @@ const taiwanSteps = [
       { key: "authority_transfer_restriction_applies", label: "주무기관의 국외 이전 제한 대상 여부", helper: "수령국 보호수준 부족, 중대 국가이익 등 제한 사유가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, visibleIf: (state: GuidedFormState) => state.cross_border_transfer === "true" },
     ],
   },
+  destinationComplianceStep,
 ] as const;
 
 // 🇧🇷 브라질 기본 상태 및 단계
@@ -677,6 +784,7 @@ const lgpdSteps = [
       { key: "access_control_in_place", label: "접근통제가 적용되어 있나요?", helper: "권한 관리, 접근 제한, 인증 통제가 적용되는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
     ],
   },
+  destinationComplianceStep,
 ] as const;
 
 const pipaSteps = [
@@ -779,6 +887,7 @@ const pipaSteps = [
       { key: "breach_response_ready", label: "침해 대응 절차가 있나요?", helper: "유출 등 사고 발생 시 대응 절차가 준비되어 있는지 확인합니다.", kind: "segmented", options: yesNoOptions, required: true },
     ],
   },
+  destinationComplianceStep,
 ] as const;
 
 export const PACK_UI_DEFINITIONS: Record<string, PackUiDefinition> = {

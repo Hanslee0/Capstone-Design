@@ -129,6 +129,87 @@ function optionLabelForField(field: GuidedField, rawValue: string) {
   return rawValue;
 }
 
+function toDestinationBoolean(value: string | undefined) {
+  if (value === "true") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  if (value === "unknown") {
+    return "unknown";
+  }
+
+  return undefined;
+}
+
+function buildDestinationPolicyData(state: GuidedFormState): JsonObject {
+  const destinationLegalBasis =
+    state.destination_processing_legal_basis || undefined;
+
+  const recipientContractAvailable = toDestinationBoolean(
+    state.destination_recipient_contract_available,
+  );
+
+  return {
+    processing_legal_basis: destinationLegalBasis,
+    lawful_basis: destinationLegalBasis,
+
+    recipient_contract_available: recipientContractAvailable,
+    processor_contract_available: recipientContractAvailable,
+    dpa_available: recipientContractAvailable,
+    dpa_in_place: recipientContractAvailable,
+    processor_agreement_in_place: recipientContractAvailable,
+    processor_contract_in_place: recipientContractAvailable,
+
+    data_subject_rights_request_ready: toDestinationBoolean(
+      state.destination_data_subject_rights_request_ready,
+    ),
+    data_subject_rights_process_ready: toDestinationBoolean(
+      state.destination_data_subject_rights_request_ready,
+    ),
+    data_subject_rights_ready: toDestinationBoolean(
+      state.destination_data_subject_rights_request_ready,
+    ),
+
+    retention_period_defined: toDestinationBoolean(
+      state.destination_retention_period_defined,
+    ),
+    retention_policy_available: toDestinationBoolean(
+      state.destination_retention_period_defined,
+    ),
+
+    security_measures_available: toDestinationBoolean(
+      state.destination_security_measures_available,
+    ),
+    security_measures_ready: toDestinationBoolean(
+      state.destination_security_measures_available,
+    ),
+    security_maintenance_measures_ready: toDestinationBoolean(
+      state.destination_security_measures_available,
+    ),
+
+    incident_response_in_place: toDestinationBoolean(
+      state.destination_incident_response_in_place,
+    ),
+    breach_response_ready: toDestinationBoolean(
+      state.destination_incident_response_in_place,
+    ),
+    breach_response_72h_ready: toDestinationBoolean(
+      state.destination_incident_response_in_place,
+    ),
+
+    appropriate_safeguards_available: toDestinationBoolean(
+      state.destination_appropriate_safeguards_available,
+    ),
+    transfer_protection_measures_ready: toDestinationBoolean(
+      state.destination_appropriate_safeguards_available,
+    ),
+  };
+}
+
 function collectVisibleStepFields(
   definition: PackUiDefinition,
   state: GuidedFormState,
@@ -383,6 +464,8 @@ export function GuidedSingleFlowPage() {
       policy_data: JsonObject;
     };
 
+    const destinationPolicyData = buildDestinationPolicyData(formState);
+
     const awsData: JsonObject = {
       ...basePayload.aws_data,
       target_region:
@@ -402,25 +485,37 @@ export function GuidedSingleFlowPage() {
           aws_data: awsData,
           policy_data: {
   ...basePayload.policy_data,
+  ...destinationPolicyData,
 
   // reference pack 데모 안정화를 위한 공통 필드
   processing_purpose_defined:
     basePayload.policy_data["processing_purpose_defined"] ?? true,
+
   data_minimized:
     basePayload.policy_data["data_minimized"] ?? true,
+
   retention_period_defined:
-    basePayload.policy_data["retention_period_defined"] ?? true,
+    destinationPolicyData["retention_period_defined"] ??
+    basePayload.policy_data["retention_period_defined"] ??
+    true,
+
+  processing_legal_basis:
+    destinationPolicyData["processing_legal_basis"] ??
+    basePayload.policy_data["processing_legal_basis"] ??
+    basePayload.policy_data["lawful_basis"] ??
+    "contract",
+
+  lawful_basis:
+    destinationPolicyData["lawful_basis"] ??
+    basePayload.policy_data["lawful_basis"] ??
+    basePayload.policy_data["processing_legal_basis"] ??
+    "contract",
 
   // 국가별 정책팩 필드명 차이 보정
   data_subject_connection:
     basePayload.policy_data["data_subject_connection"] ??
     basePayload.policy_data["data_subject_region"] ??
     originCountry,
-
-  processing_legal_basis:
-    basePayload.policy_data["processing_legal_basis"] ??
-    basePayload.policy_data["lawful_basis"] ??
-    "consent",
 
   transfer_exception_used:
     basePayload.policy_data["transfer_exception_used"] ??
